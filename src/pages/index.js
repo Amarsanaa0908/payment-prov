@@ -430,9 +430,9 @@ export default function HomePage() {
               <h4 className="font-bold mb-6 text-pink-400">Legal</h4>
               <ul className="space-y-3 text-gray-400">
                 <li>
-                  <a href="/privacy" className="hover:text-pink-400 transition-colors">
+                  <Link href="/privacy" className="hover:text-pink-400 transition-colors">
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a href="/terms" className="hover:text-pink-400 transition-colors">
@@ -440,9 +440,9 @@ export default function HomePage() {
                   </a>
                 </li>
                 <li>
-                  <a href="/security" className="hover:text-pink-400 transition-colors">
+                  <Link href="/security" className="hover:text-pink-400 transition-colors">
                     Security
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
