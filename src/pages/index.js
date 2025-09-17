@@ -337,7 +337,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-bold text-white">Mike Rodriguez</p>
-                    <p className="text-sm text-gray-400">CTO, FutureCommerce</p>
+                    <p className="text-sm text-gray-400">CTO, Амарсанаа</p>
                   </div>
                 </div>
               </CardContent>
