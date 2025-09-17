@@ -11,7 +11,18 @@ import "../styles/globals.css"
 export default function App({ Component, pageProps }) {
   const router = useRouter()
 
-  const authPages = ["/login", "/signup", "/merchant/[slug]/[id]", "/"]
+  const authPages = [
+    "/login",
+    "/signup",
+    "/merchant/[slug]/[id]",
+    "/",
+    "/about",
+    "/contact",
+    "/privacy",
+    "/security",
+    "/careers",
+    "/confirm/[id]"
+  ]
   const isAuthPage = authPages.includes(router.pathname)
 
   return (

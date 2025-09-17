@@ -52,7 +52,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="relative">
             <Badge className="mb-8 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-400 border border-cyan-500/30 backdrop-blur-sm animate-bounce">
-              ⚡ Trusted by 10,000+ Businesses
+              ⚡ Найдвартай систем
             </Badge>
             <h1 className="text-5xl lg:text-7xl font-bold text-balance mb-8 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(0,255,255,0.3)]">
               Next-Gen Payment
@@ -70,13 +70,13 @@ export default function HomePage() {
                 size="lg"
                 className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-black font-bold px-8 py-4 text-lg shadow-2xl shadow-cyan-500/25 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105"
               >
-                Get Started <ArrowRight className="ml-2 w-5 h-5" />
+                Эхлэх <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button
                 size="lg"
                 className="bg-transparent border-2 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 hover:text-cyan-300 px-8 py-4 text-lg backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]"
               >
-                Watch Demo
+                Заавар үзэх
               </Button>
             </div>
           </div>
@@ -430,17 +430,17 @@ export default function HomePage() {
               <h4 className="font-bold mb-6 text-pink-400">Legal</h4>
               <ul className="space-y-3 text-gray-400">
                 <li>
-                  <a href="#" className="hover:text-pink-400 transition-colors">
+                  <a href="/privacy" className="hover:text-pink-400 transition-colors">
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-pink-400 transition-colors">
+                  <a href="/terms" className="hover:text-pink-400 transition-colors">
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-pink-400 transition-colors">
+                  <a href="/security" className="hover:text-pink-400 transition-colors">
                     Security
                   </a>
                 </li>
