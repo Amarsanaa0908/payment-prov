@@ -263,7 +263,7 @@ export default function DeelyCheckout() {
                       <span className="text-sm font-medium text-gray-900">Qpay</span>
                     </div>
                     <div className="w-8 h-8 bg-blue-900 rounded flex items-center justify-center">
-                      <Image src="https://goodprice.mn/assets/payments-logos/qpay.png" />
+                      <Image src="https://goodprice.mn/assets/payments-logos/qpay.png" width={2000} height={2000} />
                     </div>
                   </div>
                 </div>
