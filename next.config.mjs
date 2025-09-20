@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     // remotePatterns: [new URL('https://www.goodprice.mn')],
-    domains: ['goodprice.mn', 'cdn.shopify.com']
+    domains: ['cdn.shopify.com']
   }
 };
 

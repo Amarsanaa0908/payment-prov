@@ -263,7 +263,7 @@ export default function DeelyCheckout() {
                       <span className="text-sm font-medium text-gray-900">Qpay</span>
                     </div>
                     <div className="w-8 h-8 bg-blue-900 rounded flex items-center justify-center">
-                      <Image src="https://goodprice.mn/assets/payments-logos/qpay.png" width={2000} height={2000} />
+                      <Image alt="qpay-logo" src="/qpay.jpg" width={2000} height={2000} />
                     </div>
                   </div>
                 </div>
@@ -287,7 +287,8 @@ export default function DeelyCheckout() {
                     <div key={i} className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                             <figure className="relative h-16 w-16">
-                                <Image 
+                                <Image
+                                alt={el.name} 
                                 className="w-full h-full object-cover border rounded-md" 
                                 width={2000} 
                                 height={2000} 
