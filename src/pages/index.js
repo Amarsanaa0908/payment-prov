@@ -70,7 +70,9 @@ export default function HomePage() {
                 size="lg"
                 className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-black font-bold px-8 py-4 text-lg shadow-2xl shadow-cyan-500/25 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105"
               >
-                Эхлэх <ArrowRight className="ml-2 w-5 h-5" />
+                <Link href={'/login'}>
+                Эхлэх </Link>
+                
               </Button>
               <Button
                 size="lg"
