@@ -1,129 +1,107 @@
 "use client"
 
-import { apiList, callGet, callPost } from "@/axios/api"
+import { apiList, callGet, callGetList, callPost, callPut } from "@/axios/api"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Database, Download, Key, RefreshCw, Save, SettingsIcon, Trash2, Upload } from "lucide-react"
+import { Database, Download, Edit, Key, Plus, RefreshCw, Save, SettingsIcon, Trash2, Upload } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("general")
-  const { control, register, handleSubmit, reset, formState: { errors }} = useForm({
-    defaultValues: {
-      name: '',
-      website: '',
-      bank: '',
-      accountNumber: '',
-      accountName: '',
-    },
+  const [editingUser, setEditingUser] = useState(null);
+  // const { control, register, handleSubmit, reset, formState: { errors }} = useForm({
+  //   defaultValues: {
+  //     name: '',
+  //     website: '',
+  //     bank: '',
+  //     accountNumber: '',
+  //     accountName: '',
+  //   },
+  // });
+
+const [users, setUsers] = useState([]);
+const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+const [editingIndex, setEditingIndex] = useState(null);
+
+const { control, handleSubmit, reset } = useForm({
+  defaultValues: {
+    websiteLink: '',
+    username: '',
+    password: '',
+    bankCode: '',
+    accountName: '',
+    accountNumber: ''
+  }
+});
+
+const { fields, append, remove } = useFieldArray({
+  control,
+  name: "users"
+});
+
+
+
+const handleEditUser = (index) => {
+  setEditingIndex(index);
+  reset(users[index]);
+  setIsAddUserModalOpen(true);
+};
+
+const handleDeleteUser = (index) => {
+  setUsers(users.filter((_, i) => i !== index));
+};
+
+const handleCloseModal = () => {
+  setIsAddUserModalOpen(false);
+  setEditingUser(null);
+  reset({
+    username: '',
+    usersPassword: '',
+    websiteLink: '',
+    accountNumber: '',
+    accountName: '',
+    bankCode: ''
   });
-  const [generalSettings, setGeneralSettings] = useState({
-    siteName: "Admin Dashboard",
-    siteDescription: "Modern admin dashboard for business management",
-    contactEmail: "admin@example.com",
-    timezone: "UTC",
-    language: "en",
-  })
-
-  const [userSettings, setUserSettings] = useState({
-    allowRegistration: true,
-    requireEmailVerification: true,
-    requireAdminApproval: false,
-    defaultUserRole: "user",
-  })
-
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: false,
-    marketingEmails: true,
-    notificationFrequency: "immediate",
-  })
-
-  const [securitySettings, setSecuritySettings] = useState({
-    twoFactorAuth: false,
-    sessionTimeout: "30",
-    passwordExpiry: "90",
-  })
-
-  const [apiSettings, setApiSettings] = useState({
-    apiRateLimit: "1000",
-  })
-
-  const [systemSettings, setSystemSettings] = useState({
-    backupFrequency: "daily",
-  })
+};
 
   const [loadingStates, setLoadingStates] = useState({})
   const [saveStatuses, setSaveStatuses] = useState({})
 
-  useEffect(() => {
-    const loadTabSettings = (tabName, setter) => {
-      const saved = localStorage.getItem(`adminSettings_${tabName}`)
-      if (saved) {
-        try {
-          setter(JSON.parse(saved))
-        } catch (error) {
-          console.error(`Failed to load ${tabName} settings:`, error)
-        }
-      }
-    }
-
-    loadTabSettings("general", setGeneralSettings)
-    loadTabSettings("users", setUserSettings)
-    loadTabSettings("notifications", setNotificationSettings)
-    loadTabSettings("security", setSecuritySettings)
-    loadTabSettings("api", setApiSettings)
-    loadTabSettings("system", setSystemSettings)
-  }, [])
-
-  const handleSaveTab = async (tabName, settings) => {
-    setLoadingStates((prev) => ({ ...prev, [tabName]: true }))
-    setSaveStatuses((prev) => ({ ...prev, [tabName]: "" }))
-
-    try {
-      // Save to localStorage
-      localStorage.setItem(`adminSettings_${tabName}`, JSON.stringify(settings))
-
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      setSaveStatuses((prev) => ({ ...prev, [tabName]: "Settings saved successfully!" }))
-      setTimeout(() => {
-        setSaveStatuses((prev) => ({ ...prev, [tabName]: "" }))
-      }, 3000)
-    } catch (error) {
-      setSaveStatuses((prev) => ({ ...prev, [tabName]: "Failed to save settings. Please try again." }))
-      console.error("Save error:", error)
-    } finally {
-      setLoadingStates((prev) => ({ ...prev, [tabName]: false }))
-    }
-  }
 
   const handleGeneralSave = (values) => {
-    // setLoadingStates((prev) => ({ ...prev, [tabName]: true}))
-    callPost(`${apiList.merchant}/info`, {
-      name: values.name,
-      website: values.website,
-      bankCode: values.bank,
-      accountNumber: values.accountNumber,
-      accountName: values.accountName
-    }).then((res) => {
-            if (res?.status) {
-        toast(res.msg[0])
-      } else {
-        toast.error(res.msg[0])
-      }
-    })
+   setLoadingStates(prev => ({ ...prev, general: true }));
+
+callPost(`${apiList.merchant}/info`, {
+  name: values.name,
+  website: values.website,
+  bankCode: values.bank,
+  accountNumber: values.accountNumber,
+  accountName: values.accountName
+}).then((res) => {
+  if (res?.status) {
+    toast(res.msg[0]);
+  } else {
+    toast.error(res.msg[0]);
   }
+  
+  setLoadingStates(prev => ({ ...prev, general: false }));
+}).catch((error) => {
+  toast.error("Something went wrong!");
+  setLoadingStates(prev => ({ ...prev, general: false }));
+});
+
+  }
+
 
   useEffect(() => {
 
@@ -145,23 +123,47 @@ export default function Settings() {
       
     }
 
-    fetchSettings()
+     const fetchUsers = async () => {
+    try {
+      const response = await callGet(`${apiList.merchant}/staff`)
+      
+      setUsers(response.items);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+  
+  fetchUsers();
+
+  fetchSettings()
 
    
   }, [reset])
 
-  const handleStaffSave = (values) => {
-    callPost(`${apiList.merchant}/staff`, {
-      username: values.username,
-      password: values.password
-    }).then((res) => {
-      if (res?.status) {
-        toast.success(res.msg[0])
-      } else {
-        toast.success(res.msg[0])
-      }
-    })
-  }
+
+  const handleUserFormSubmit = async (values) => {
+      // Update existing user
+      callPost(`${apiList.merchant}/staff`, {
+        website: values.websiteLink,
+        username: values.username,
+        password: values.password,
+        accountNumber: values.accountNumber,
+        accountName: values.accountName,
+        bankCode: values.bankCode,
+        name: values.name,
+      }).then((res) => {
+        if (res?.status) {
+          toast.success(res.msg[0])
+        } else {
+          toast.error(res.msg[0])
+        }
+      })
+    reset();
+      handleCloseModal(true)
+
+ 
+};
+  
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
@@ -178,9 +180,9 @@ export default function Settings() {
             <TabsTrigger value="general" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Ерөнхий
             </TabsTrigger>
-            <TabsTrigger value="users" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
+            {/* <TabsTrigger value="users" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Хэрэглэгч
-            </TabsTrigger>
+            </TabsTrigger> */}
             {/* <TabsTrigger value="notifications" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Мэдэгдэл
             </TabsTrigger>
@@ -196,7 +198,7 @@ export default function Settings() {
           </TabsList>
         </div>
 
-        <TabsContent value="general" className="space-y-4">
+        {/* <TabsContent value="general" className="space-y-4">
           <form
             onSubmit={handleSubmit(handleGeneralSave)}
           >
@@ -246,7 +248,7 @@ export default function Settings() {
                     )} />
                   </div>
                 </div>
-                {/* <div className="space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="siteDescription">Site Description</Label>
                   <Textarea
                     id="siteDescription"
@@ -254,7 +256,7 @@ export default function Settings() {
                     onChange={(e) => setGeneralSettings((prev) => ({ ...prev, siteDescription: e.target.value }))}
                     rows={3}
                   />
-                </div> */}
+                </div>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="bank">Банк</Label>
@@ -287,120 +289,262 @@ export default function Settings() {
               </CardContent>
             </Card>
           </form>
-        </TabsContent>
+        </TabsContent> */}
 
-        <TabsContent value="users" className="space-y-4">
-          <form
-            onSubmit={handleSubmit(handleStaffSave)}
-          >
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-base sm:text-lg">Хандах эрх тохиргоо</CardTitle>
-                    <CardDescription className="text-sm">Та бидэнд Shopify.com дэлгүүр лүүгээ хандах эрх өгснөөр бид тохиргоо хийнэ төлбөрийн систем холбодог, Нэг удаагийн код асууж болно.</CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {saveStatuses.users && (
-                      <span
-                        className={`text-sm ${saveStatuses.users.includes("success") ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {saveStatuses.users}
-                      </span>
-                    )}
-                    <Button type="submit" disabled={loadingStates.users}>
-                      <Save className="h-4 w-4 mr-2" />
-                      {loadingStates.users ? "Хадгалж байна..." : "Хадгалах"}
-                    </Button>
-                  </div>
+        <TabsContent value="general" className="space-y-4">
+  <Card>
+    <CardHeader>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <CardTitle className="text-base sm:text-lg">Хандах эрх тохиргоо</CardTitle>
+          <CardDescription className="text-sm">
+            Та бидэнд Shopify.com дэлгүүр лүүгээ хандах эрх өгснөөр бид тохиргоо хийнэ төлбөрийн систем холбодог, Нэг удаагийн код асууж болно.
+          </CardDescription>
+        </div>
+        <Button type="button" onClick={() => setIsAddUserModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Шинэ нэмэх
+        </Button>
+      </div>
+    </CardHeader>
+    <CardContent>
+      {users?.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          Одоогоор данс нэмэгдээгүй байна
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {users?.map((user, index) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-1">
+                <div>
+                  <span className="text-xs text-gray-500">Нэвтрэх нэр</span>
+                  <p className="font-medium">{user.username}</p>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Нэвтрэх нэр</Label>
-                    <Controller name="username" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="username"
-                        {...field}
-                    />
-                    )} />
-                    
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Нууц үг</Label>
-                    <Controller name="password" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                      type="password"
-                        id="password"
-                        {...field}
-                    />
-                    )} />
-                  </div>
+                <div>
+                  <span className="text-xs text-gray-500">Дансны дугаар</span>
+                  <p className="font-medium">{user.accountNumber}</p>
                 </div>
-              </CardContent>
-              {/* <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">User Registration</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Allow new users to register accounts</p>
-                  </div>
-                  <Switch
-                    checked={userSettings.allowRegistration}
-                    onCheckedChange={(checked) => setUserSettings((prev) => ({ ...prev, allowRegistration: checked }))}
-                  />
+                <div>
+                  <span className="text-xs text-gray-500">Вэбсайт</span>
+                  <p className="font-medium">{user.website}</p>
                 </div>
-                <Separator />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">Email Verification</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Require email verification for new accounts
-                    </p>
-                  </div>
-                  <Switch
-                    checked={userSettings.requireEmailVerification}
-                    onCheckedChange={(checked) =>
-                      setUserSettings((prev) => ({ ...prev, requireEmailVerification: checked }))
-                    }
-                  />
+                <div>
+                  <span className="text-xs text-gray-500">Нэр</span>
+                  <p className="font-medium">{user.name}</p>
                 </div>
-                <Separator />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">Admin Approval</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Require admin approval for new accounts</p>
-                  </div>
-                  <Switch
-                    checked={userSettings.requireAdminApproval}
-                    onCheckedChange={(checked) =>
-                      setUserSettings((prev) => ({ ...prev, requireAdminApproval: checked }))
-                    }
-                  />
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <Label>Default User Role</Label>
-                  <Select
-                    value={userSettings.defaultUserRole}
-                    onValueChange={(value) => setUserSettings((prev) => ({ ...prev, defaultUserRole: value }))}
-                  >
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent> */}
-            </Card>
-          </form>
-        </TabsContent>
+              </div>
+              <div className="flex gap-2 ml-4">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleDeleteUser(user.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </CardContent>
+  </Card>
 
-        <TabsContent value="notifications" className="space-y-4">
+  <Dialog open={isAddUserModalOpen} onOpenChange={handleCloseModal}>
+  <DialogContent className="sm:max-w-[500px] bg-white">
+    <DialogHeader>
+      <DialogTitle className='text-black'>
+        {editingUser ? 'Данс засах' : 'Шинэ данс нэмэх'}
+      </DialogTitle>
+      <DialogDescription>
+        Дансны мэдээллийг оруулна уу
+      </DialogDescription>
+    </DialogHeader>
+    <form onSubmit={handleSubmit(handleUserFormSubmit)}>
+      <div className="space-y-4 py-4">
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="username">Нэр</Label>
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: 'Нэр оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="name"
+                  placeholder=""
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="username">Нэвтрэх нэр *</Label>
+          <Controller
+            name="username"
+            control={control}
+            rules={{ required: 'Нэвтрэх нэр оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="username"
+                  placeholder="example@gmail.com"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="password">Нууц үг *</Label>
+          <Controller
+            name="password"
+            control={control}
+            rules={{ required: 'Нууц үг оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  type="password"
+                  id="password"
+                  placeholder="Нууц үг"
+                  {...field}
+                  className="flex-1 text-black"
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="websiteLink">Вэбсайт линк *</Label>
+          <Controller
+            name="websiteLink"
+            control={control}
+            rules={{ required: 'Вэбсайт линк оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="websiteLink"
+                  placeholder="www.example.com"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="accountNumber">Дансны дугаар *</Label>
+          <Controller
+            name="accountNumber"
+            control={control}
+            rules={{ required: 'Дансны дугаар оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="accountNumber"
+                  placeholder="Дансны дугаар"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="accountName">Дансны нэр *</Label>
+          <Controller
+            name="accountName"
+            control={control}
+            rules={{ required: 'Дансны нэр оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="accountName"
+                  placeholder="Дансны нэр"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="bankCode">Банк *</Label>
+          <Controller
+            name="bankCode"
+            control={control}
+            rules={{ required: 'Банк сонгоно уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <select
+                  id="bankCode"
+                  className="flex h-10 w-full rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  {...field}
+                >
+                  <option value="">Банк сонгох</option>
+                  <option value="Khan Bank">Khan Bank</option>
+                  <option value="Golomt Bank">Golomt Bank</option>
+                  <option value="TDB">TDB</option>
+                  <option value="State Bank">State Bank</option>
+                  <option value="Xac Bank">Xac Bank</option>
+                </select>
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+      </div>
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCloseModal}
+        >
+          Болих
+        </Button>
+        <Button type="submit" disabled={loadingStates.users}>
+          {loadingStates.users ? "Хадгалж байна..." : editingUser ? "Засах" : "Нэмэх"}
+        </Button>
+      </DialogFooter>
+    </form>
+  </DialogContent>
+</Dialog>
+</TabsContent>
+
+        {/* <TabsContent value="notifications" className="space-y-4">
           <form
             onSubmit={(e) => {
               e.preventDefault()
@@ -789,7 +933,7 @@ export default function Settings() {
               </CardContent>
             </Card>
           </form>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   )
