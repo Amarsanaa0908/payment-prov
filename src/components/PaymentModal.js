@@ -21,7 +21,7 @@ export default function PaymentModal({ isOpen, onClose, data, price, slug }) {
     setLoading(true)
     callGet(`${apiList.merchant}/check/${slug}/${data?.orderId}`).then((res) => {
       if (res?.data === 'COMPLETED') {
-        router.push(`/successful/${res?.data}`)
+        router.push(`/confirm/${res?.data}`)
       } else {
         toast('Төлбөр төлөгдөөгүй байна')
       }
