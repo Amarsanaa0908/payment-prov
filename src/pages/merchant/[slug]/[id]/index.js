@@ -2,6 +2,7 @@
 
 import { apiList, callGet, callGetList, callPost } from "@/axios/api"
 import PaymentModal from "@/components/PaymentModal"
+import { useMainContext } from "@/context/MainContext"
 import formatNumberWithCommas from "@/lib/math"
 import Image from "next/image"
 import Link from "next/link"
@@ -27,6 +28,7 @@ export default function DeelyCheckout() {
   const [paymentData, setPaymentData] = useState()
   const [openModal, setOpenModal] = useState()
   const [delivery, setDelivery] = useState([])
+  const { userInfo } = useMainContext()
 
   // ❌ Remove price logic from here
 useEffect(() => {
@@ -44,7 +46,7 @@ useEffect(() => {
 
   const fetchDelivery = async () => {
     try {
-      const response = await callGet(`${apiList.delivery}/method/${slug}`);
+      const response = await callGet(`${apiList.delivery}/method/${slug}?filters=[["slug","${slug}"]]`);
       setDelivery(response.items || []);
       if (response?.items.length > 0) {
       const firstItem = response?.items[0];
