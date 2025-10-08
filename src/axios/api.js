@@ -179,7 +179,8 @@ const apiList = {
   payment: '/payment',
   report: '/report',
   merchant: '/merchant',
-  register: '/register'
+  register: '/register',
+  delivery: '/delivery',
 };
 
 export {

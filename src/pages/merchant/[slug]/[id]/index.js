@@ -1,9 +1,10 @@
 "use client"
 
-import { apiList, callGet, callPost } from "@/axios/api"
+import { apiList, callGet, callGetList, callPost } from "@/axios/api"
 import PaymentModal from "@/components/PaymentModal"
 import formatNumberWithCommas from "@/lib/math"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -12,37 +13,67 @@ import { toast } from "sonner"
 export default function DeelyCheckout() {
   const router = useRouter()
   const { id, slug } = router.query
-  const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    apartment: "",
-    city: "",
-    phone: "",
-    deliveryOption: "free",
-    paymentMethod: "qpay",
-  })
   const [loading, setLoading] = useState(false)
   const { register, handleSubmit, formState: { errors }} = useForm()
-  const [selected, setSelected] = useState('free')
+  const [selected, setSelected] = useState({
+    id: "",
+    name: "",
+    description: "",
+    price: 0.0,
+    store: ""
+  })
   const [data, setData] = useState()
   const [price, setPrice] = useState()
   const [paymentData, setPaymentData] = useState()
   const [openModal, setOpenModal] = useState()
+  const [delivery, setDelivery] = useState([])
 
-  useEffect(() => {
-    if (id && slug) {
-        callGet(`${apiList.merchant}/${slug}/${id}`).then((res) => {
-            setData(res?.data)
-            if (selected === 'free')  {
-                setPrice(res?.data?.amount);
-            } else {
-                setPrice(Number(res?.data?.amount) + 20000)
-            }
-        })
+  // ❌ Remove price logic from here
+useEffect(() => {
+  if (!id || !slug) return;
+
+  const fetchOrder = async () => {
+    try {
+      const res = await callGet(`${apiList.merchant}/${slug}/${id}`);
+      setData(res?.data);
+      
+    } catch (error) {
+      console.log('Error fetching order:', error);
     }
-  }, [id, slug, selected])
+  };
+
+  const fetchDelivery = async () => {
+    try {
+      const response = await callGet(`${apiList.delivery}/method/${slug}`);
+      setDelivery(response.items || []);
+      if (response?.items.length > 0) {
+      const firstItem = response?.items[0];
+
+      setSelected({
+        id: firstItem.id || "",
+        name: firstItem.name || "",
+        description: firstItem.description || "",
+        price: Number(firstItem.price || 0),
+        store: firstItem.store || ""
+      });
+    }
+    } catch (error) {
+      console.log('Error fetching delivery:', error);
+    }
+  };
+
+  fetchOrder();
+  fetchDelivery();
+}, [id, slug]); // ✅ Clean
+
+useEffect(() => {
+  if (!data?.amount) return;
+
+  const orderAmount = Number(data.amount);
+  setPrice(selected.price === '0' ? orderAmount : orderAmount + Number(selected.price));
+}, [selected, data]);
+
+
 
   const handlePayment = (values) => {
     setLoading(true)
@@ -56,7 +87,7 @@ export default function DeelyCheckout() {
         city: values.city,
         additionalPhone: values.additionalPhone,
         phone: values.phone,
-        delivery: selected,
+        delivery: selected.id,
         merchantId: slug
     }).then((res) => {
         setLoading(false)
@@ -86,9 +117,11 @@ export default function DeelyCheckout() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="text-center">
+            <a href={`https://${data?.url}`} target="_blank" rel="noopener noreferrer">
             <h1 className="text-3xl font-bold text-black">
               <span className={`text-[${data?.color}]`}>{data?.name}</span>
-            </h1>
+            </h1></a>
+            
           </div>
         </div>
       </div>
@@ -190,35 +223,39 @@ export default function DeelyCheckout() {
                 <span className='flex flex-col-reverse lg:flex-row justify-between items-center'>
                   <h2 className="text-lg font-semibold text-gray-900">Хүргэлтийн мэдээлэл</h2>
                 </span>
-               <label
-                  className={`flex items-start p-4! border rounded-t-lg cursor-pointer ${
+                {delivery.map((el, i) => (
+                  <label
+                  className={`flex items-start p-4! border rounded-lg cursor-pointer ${
                     selected === "free"
                     ? "border-red-500"
                     : "border-gray-300"
                   }`}
-                >
-                  <input
+                  key={i}
+                  >
+                    <input
                   type="radio"
                   name="delivery"
                   value="paid"
-                  checked={selected === "free"}
-                  onChange={() => setSelected("free")}
+                  checked={selected === el}
+                  onChange={() => setSelected(el)}
                   className="mt-1 mr-3 accent-blue-600"
                   />
                   <div className="flex justify-between w-full">
                     <span className='text-sm font-medium text-gray-800 flex-1'>
-                      Энгийн хүргэлт
+                      {el.name}
                       <p className='text-xs text-gray-500'>
-                        24-48 цагийн хооронд хүргэгдэнэ
+                        {el.description}
                       </p>
                     </span>
                     <span className="text-sm font-semibold text-blue-600 mt-1">
-                      ҮНЭГҮЙ
+                      {el.price === '0' ? 'Үнэгүй' : el.price}
                     </span>
                   </div>
                 </label>
-                <label
-                  className={`flex items-start p-4! border rounded-b-lg cursor-pointer ${
+                ))}
+               
+                {/* <label
+                  className={`flex items-start p-4! border rounded-lg cursor-pointer ${
                     selected === "paid"
                     ? "border-red-500"
                     : "border-gray-300"
@@ -243,7 +280,7 @@ export default function DeelyCheckout() {
                       20,000
                     </span>
                   </div>
-                </label>
+                </label> */}
               </div>
               </div>
 
@@ -272,8 +309,9 @@ export default function DeelyCheckout() {
               <button
                 type="submit"
                 className={`w-full bg-black hover:bg-blue-500 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200`}
+                disabled={loading}
               >
-                Төлбөр төлөх
+                {loading ? 'Уншиж байна...' : 'Төлбөр төлөх'}
               </button>
             </form>
           </div>
@@ -320,12 +358,12 @@ export default function DeelyCheckout() {
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Хүргэлт</span>
-                  <span className="font-medium text-black">{selected === 'free' ? 'Үнэгүй' : '20,000 MNT'} </span>
+                  <span className="font-medium text-black">{formatNumberWithCommas(selected.price)} MNT </span>
                 </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold text-gray-900">Нийт</span>
-                  <span className="text-lg font-semibold text-gray-900">₮ {price} MNT</span>
+                  <span className="text-lg font-semibold text-gray-900">₮ {formatNumberWithCommas(price)} MNT</span>
                 </div>
               </div>
             </div>

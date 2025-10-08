@@ -55,7 +55,7 @@ export default function PaymentModal({ isOpen, onClose, data, price, slug }) {
                 
                 <div className="space-y-2 mb-4">
                   <div className="text-sm font-medium text-gray-900">QR уншуулж төлнө үү</div>
-                  <div className="text-xs text-gray-500">Use your banking app to scan this QR code</div>
+                  <div className="text-xs text-gray-500">Банкны аппликейшн ашиглаж төлөх</div>
                 </div>
 
                 <div className="">
