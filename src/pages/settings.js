@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Database, Download, Edit, Key, Plus, RefreshCw, Save, SettingsIcon, Trash2, Upload } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { Database, Download, Edit, Edit2, Key, Plus, RefreshCw, Save, SettingsIcon, Trash2, Upload } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -30,7 +31,9 @@ export default function Settings() {
   // });
 
 const [users, setUsers] = useState([]);
+const [delivery, setDelivery] = useState([]);
 const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+const [isAddDeliveryModalOpen, setIsAddDeliveryModalOpen] = useState(false);
 const [editingIndex, setEditingIndex] = useState(null);
 
 const { control, handleSubmit, reset } = useForm({
@@ -63,6 +66,7 @@ const handleDeleteUser = (index) => {
 
 const handleCloseModal = () => {
   setIsAddUserModalOpen(false);
+  setIsAddDeliveryModalOpen(false);
   setEditingUser(null);
   reset({
     username: '',
@@ -124,19 +128,28 @@ callPost(`${apiList.merchant}/info`, {
     }
 
      const fetchUsers = async () => {
-    try {
-      const response = await callGet(`${apiList.merchant}/staff`)
-      
-      setUsers(response.items);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+      try {
+        const response = await callGet(`${apiList.merchant}/staff`)
+        
+        setUsers(response.items);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    const fetchDelivery = async () => {
+      try {
+        const response = await callGet(`${apiList.merchant}/delivery`)
+
+        setDelivery(response.items);
+      } catch (error) {
+        console.log(error)
+      }
     }
-  };
   
   fetchUsers();
-
   fetchSettings()
-
+  fetchDelivery()
    
   }, [reset])
 
@@ -160,9 +173,23 @@ callPost(`${apiList.merchant}/info`, {
       })
     reset();
       handleCloseModal(true)
-
- 
 };
+
+const handleDeliveryFormSubmit = async (values) => {
+  callPost(`${apiList.merchant}/delivery`, {
+    name: values.deliveryName,
+    description: values.deliveryDesc,
+    price: values.price
+  }).then((res) => {
+    if (res?.status) {
+      toast.success(res.msg[0])
+      reset();
+      handleCloseModal(true)
+    } else {
+      toast.error(res.msg[0])
+    }
+  })
+}
   
 
   return (
@@ -180,9 +207,9 @@ callPost(`${apiList.merchant}/info`, {
             <TabsTrigger value="general" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Ерөнхий
             </TabsTrigger>
-            {/* <TabsTrigger value="users" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
-              Хэрэглэгч
-            </TabsTrigger> */}
+            <TabsTrigger value="delivery" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
+              Хүргэлт
+            </TabsTrigger>
             {/* <TabsTrigger value="notifications" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Мэдэгдэл
             </TabsTrigger>
@@ -198,7 +225,7 @@ callPost(`${apiList.merchant}/info`, {
           </TabsList>
         </div>
 
-        {/* <TabsContent value="general" className="space-y-4">
+        <TabsContent value="delivery" className="space-y-4">
           <form
             onSubmit={handleSubmit(handleGeneralSave)}
           >
@@ -206,9 +233,9 @@ callPost(`${apiList.merchant}/info`, {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <CardTitle className="text-base sm:text-lg">Ерөнхий тохиргоо</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">Хүргэлтийн тохиргоо</CardTitle>
                     <CardDescription className="text-sm">
-                      Ерөнхий тохиргоо болон дансны мэдээллээ оруулаарай
+                      Санал болгодог хүргэлтийн хэлбэрүүдээ нэмээрэй
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -219,77 +246,148 @@ callPost(`${apiList.merchant}/info`, {
                         {saveStatuses.general}
                       </span>
                     )}
-                    <Button type="submit" disabled={loadingStates.general}>
-                      <Save className="h-4 w-4 mr-2" />
-                      {loadingStates.general ? "Хадгалж байна..." : "Хадгалах"}
+                    <Button type="button" onClick={() => setIsAddDeliveryModalOpen(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Шинэ нэмэх
                     </Button>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Нэр</Label>
-                    <Controller name="name" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="name"
-                        {...field}
-                    />
-                    )} />
-                    
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website link</Label>
-                    <Controller name="website" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="website"
-                        {...field}
-                    />
-                    )} />
-                  </div>
+              <CardContent>
+                <div className="space-y-3">
+          {delivery?.map((del, index) => (
+            <div
+              key={del.id}
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+                <div>
+                  <span className="text-xs text-gray-500">Нэр</span>
+                  <p className="font-medium">{del.name}</p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="siteDescription">Site Description</Label>
-                  <Textarea
-                    id="siteDescription"
-                    value={generalSettings.siteDescription}
-                    onChange={(e) => setGeneralSettings((prev) => ({ ...prev, siteDescription: e.target.value }))}
-                    rows={3}
-                  />
+                <div>
+                  <span className="text-xs text-gray-500">Тайлбар</span>
+                  <p className="font-medium">{del.description}</p>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="bank">Банк</Label>
-                   <Controller name="bank" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="bank"
-                        {...field}
-                    />
-                    )} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="accountNumber">Дансны дугаар</Label>
-                     <Controller name="accountNumber" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="accountNumber"
-                        {...field}
-                    />
-                    )} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="siteName">Данс эзэмшигчийн нэр</Label>
-                   <Controller name="accountName" control={control} rules={{ required: true}} render={({ field }) => (
-                      <Input
-                        id="accountName"
-                        {...field}
-                    />
-                    )} />
-                  </div>
+                <div>
+                  <span className="text-xs text-gray-500">Үнэ</span>
+                  <p className="font-medium">{del.price}</p>
                 </div>
+              </div>
+              <div className="flex gap-2 ml-4">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleDeleteUser(del.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
               </CardContent>
+                
             </Card>
           </form>
-        </TabsContent> */}
+          <Dialog open={isAddDeliveryModalOpen} onOpenChange={handleCloseModal}>
+  <DialogContent className="sm:max-w-[500px] bg-white">
+    <DialogHeader>
+      <DialogTitle className='text-black'>
+        Шинэ хүргэлт нэмэх
+      </DialogTitle>
+      <DialogDescription>
+        Хүргэлтийн мэдээллийг оруулна уу
+      </DialogDescription>
+    </DialogHeader>
+    
+    <form onSubmit={handleSubmit(handleDeliveryFormSubmit)}>
+      <div className="space-y-4 py-4">
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="deliveryName">Нэр</Label>
+          <Controller
+            name="deliveryName"
+            control={control}
+            rules={{ required: 'Нэр оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="deliveryName"
+                  placeholder="Express delivery"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="deliveryDesc">Тайлбар *</Label>
+          <Controller
+            name="deliveryDesc"
+            control={control}
+            rules={{ required: 'Нэвтрэх нэр оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  id="deliveryDesc"
+                  placeholder="2 цагийн дотор хүргэгдэнэ"
+                  className='text-black'
+                  {...field}
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className='text-black' htmlFor="price">Үнэ *</Label>
+          <Controller
+            name="price"
+            control={control}
+            rules={{ required: 'Үнэ оруулна уу' }}
+            render={({ field, fieldState }) => (
+              <>
+                <Input
+                  type="number"
+                  id="price"
+                  placeholder="20,000"
+                  {...field}
+                  className="flex-1 text-black"
+                />
+                {fieldState.error && (
+                  <span className="text-xs text-red-600">{fieldState.error.message}</span>
+                )}
+              </>
+            )}
+          />
+        </div>
+
+        </div>
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCloseModal}
+        >
+          Болих
+        </Button>
+        <Button type="submit" disabled={loadingStates.users}>
+          {loadingStates.users ? "Хадгалж байна..." : editingUser ? "Засах" : "Нэмэх"}
+        </Button>
+      </DialogFooter>
+    </form>
+  </DialogContent>
+</Dialog>
+        </TabsContent>
 
         <TabsContent value="general" className="space-y-4">
   <Card>
