@@ -146,6 +146,8 @@ callPost(`${apiList.merchant}/info`, {
         console.log(error)
       }
     }
+
+    
   
   fetchUsers();
   fetchSettings()
@@ -179,7 +181,8 @@ const handleDeliveryFormSubmit = async (values) => {
   callPost(`${apiList.merchant}/delivery`, {
     name: values.deliveryName,
     description: values.deliveryDesc,
-    price: values.price
+    price: values.price,
+    id: values.store,
   }).then((res) => {
     if (res?.status) {
       toast.success(res.msg[0])
@@ -260,7 +263,11 @@ const handleDeliveryFormSubmit = async (values) => {
               key={del.id}
               className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 flex-1">
+                <div>
+                  <span className="text-xs text-gray-500">Нэр</span>
+                  <p className="font-medium">{del.store}</p>
+                </div>
                 <div>
                   <span className="text-xs text-gray-500">Нэр</span>
                   <p className="font-medium">{del.name}</p>
@@ -304,6 +311,33 @@ const handleDeliveryFormSubmit = async (values) => {
     
     <form onSubmit={handleSubmit(handleDeliveryFormSubmit)}>
       <div className="space-y-4 py-4">
+
+        <div className="space-y-2">
+  <Label className="text-black" htmlFor="store">Дэлгүүр *</Label>
+  <Controller
+    name="store"
+    control={control}
+    rules={{ required: 'Дэлгүүр сонгоно уу' }}  // Updated message
+    render={({ field, fieldState }) => (
+      <>
+        <select
+          id="store"
+          className="flex h-10 w-full rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          {...field}
+        >
+          <option value="">Дэлгүүр сонгоно уу</option> {/* Default placeholder */}
+          {users?.map((el) => (
+            <option key={el.id} value={el.id}>{el.name}</option>
+          ))}
+        </select>
+        {fieldState.error && (
+          <span className="text-xs text-red-600">{fieldState.error.message}</span>
+        )}
+      </>
+    )}
+  />
+</div>
+
 
         <div className="space-y-2">
           <Label className='text-black' htmlFor="deliveryName">Нэр</Label>
