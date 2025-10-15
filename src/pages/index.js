@@ -249,7 +249,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center justify-between p-5 bg-gradient-to-r from-pink-500/10 to-cyan-500/10 rounded-2xl border border-pink-500/20">
                   <span className="text-gray-300">Transaction Fee</span>
-                  <span className="font-bold text-pink-400 text-xl">1.9% + 20¢</span>
+                  <span className="font-bold text-pink-400 text-xl">2.0%</span>
                 </div>
                 <Button className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-black font-bold py-4 text-lg shadow-2xl shadow-cyan-500/25 hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 mt-6">
                   Launch Now
