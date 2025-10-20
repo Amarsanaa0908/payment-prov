@@ -1,9 +1,30 @@
+import { apiList, callPost } from "@/axios/api";
+import PaymentModal from "@/components/Modals/PaymentModal";
 import { QRCodeCanvas } from "qrcode.react";
+import { useEffect, useState } from "react";
 
 export default function DemoPage() {
+    const [loading, setLoading] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
+    const [paymentData, setPaymentData] = useState()
+
+    const handleClick = () => {
+    setLoading(true);
+    callPost(`${apiList.payment}/ard`).then((res) => {
+      setLoading(false);
+      if (res.status) {
+        setOpenModal(true)
+        setPaymentData(res?.data)
+      }
+    })
+  };
+
     return (
         <div>
-            <QRCodeCanvas value={'00020101021226540014A00000084300010108TDBMMNUB022000000000000000046821520493995303496540410005802MN5907PACK.MN6011ULAANBAATAR610514200627901256a2cb34d-a404-4246-824b-d030546821050810269541070412340805descr5008MOSTMNUB8002016304C60B'} />
+            <PaymentModal isOpen={openModal} data={paymentData && paymentData} />
+
+            <button onClick={() => handleClick()}>Click here</button>
         </div>
+        
     )
 }
