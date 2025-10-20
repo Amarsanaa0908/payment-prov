@@ -1,7 +1,6 @@
 import { callGet } from '@/axios/api';
 import { useRouter } from 'next/router';
 import { QRCodeCanvas } from 'qrcode.react';
-import Modal from 'react-minimal-modal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
