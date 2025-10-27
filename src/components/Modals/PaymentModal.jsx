@@ -18,12 +18,12 @@ const PaymentModal = ({ isOpen, onClose, data, price, slug }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto bg-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md mx-auto bg-white max-h-[90vh] overflow-y-auto pb-20">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold text-black">Төлбөр төлөх</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 pb-8">
           <div className="text-center">
             <div className="text-2xl sm:text-3xl font-bold text-gray-900">{price} MNT</div>
           </div>
@@ -57,10 +57,7 @@ const PaymentModal = ({ isOpen, onClose, data, price, slug }) => {
                     })}
                 </ul>
               </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-2 sm:gap-3">
+              <div className="flex gap-2 sm:gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent text-black">
               Буцах
             </Button>
@@ -68,6 +65,10 @@ const PaymentModal = ({ isOpen, onClose, data, price, slug }) => {
               Төлбөр шалгах
             </Button>
           </div>
+            </CardContent>
+          </Card>
+
+          
 
           {/* Payment Status */}
           <div className="text-center">
