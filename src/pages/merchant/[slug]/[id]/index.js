@@ -66,7 +66,7 @@ useEffect(() => {
 
   fetchOrder();
   fetchDelivery();
-}, [id, slug]); // ✅ Clean
+}, [id, slug]);
 
 useEffect(() => {
   if (!data?.amount) return;

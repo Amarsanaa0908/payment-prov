@@ -7,16 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useMainContext } from "@/context/MainContext"
 import { setToken } from "@/lib/auth"
 import { AlertCircle, Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 export default function Login() {
-    const router = useRouter()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,13 +26,22 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { userInfo } = useMainContext()
 
   const { register, handleSubmit, formState: { errors }} = useForm()
+
+  useEffect(() => {
+    if (userInfo) {
+      router.replace('/dashboard')
+    }
+  }, [router, userInfo])
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (error) setError("")
   }
+
+
 
   const handleLogin = (values) => {
     setIsLoading(true)

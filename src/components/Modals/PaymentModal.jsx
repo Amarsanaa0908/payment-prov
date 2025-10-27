@@ -18,61 +18,53 @@ const PaymentModal = ({ isOpen, onClose, data, price, slug }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto bg-white">
+      <DialogContent className="max-w-md mx-auto bg-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold text-black">Төлбөр төлөх</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900">
-              {price} MNT
-            </div>
-            {/* <div className="text-sm text-gray-500 mt-1">Payment Amount</div> */}
+            <div className="text-2xl sm:text-3xl font-bold text-gray-900">{price} MNT</div>
           </div>
+
           <Card>
-              <CardContent className="p-6 text-center">
-                <div className="mb-4">
-                  <div className="flex justify-center items-center">
-                    <QRCodeCanvas value={data?.qrCode || ""} />
-
-                    
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="mb-4">
+                <div className="flex justify-center items-center">
+                  <div className="w-full max-w-[200px] sm:max-w-[256px]">
+                    <QRCodeCanvas value={data?.qrCode || ""} size={200} className="w-full h-auto" />
                   </div>
-                  
                 </div>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="text-sm font-medium text-gray-900">QR уншуулж төлнө үү</div>
-                  <div className="text-xs text-gray-500">Банкны аппликейшн ашиглаж төлөх</div>
-                </div>
+              </div>
 
-                <div className="">
-                  <ul className='sm:hidden flex justify-center flex-wrap gap-5'>
-          {data &&
-            data?.links.map((el, i) => {
-              return (
-                <li key={i}>
-                  <a href={el.link}>
-                    <img alt={el.logo} width={50} height={50} src={el.logo} />
-                  </a>
-                </li>
-              );
-            })}
-        </ul>
-                </div>
+              <div className="space-y-2 mb-4">
+                <div className="text-sm font-medium text-gray-900">QR уншуулж төлнө үү</div>
+                <div className="text-xs text-gray-500">Банкны аппликейшн ашиглаж төлөх</div>
+              </div>
 
-              </CardContent>
-            </Card>
+              <div>
+                <ul className="sm:hidden flex justify-center flex-wrap gap-5">
+                  {data &&
+                    data?.links.map((el, i) => {
+                      return (
+                        <li key={i}>
+                          <a href={el.link}>
+                            <img alt={el.logo} width={50} height={50} src={el.logo || "/placeholder.svg"} />
+                          </a>
+                        </li>
+                      )
+                    })}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Action Buttons */}
-          <div className="flex space-x-3">
+          <div className="flex gap-2 sm:gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent text-black">
               Буцах
             </Button>
-            <Button
-              onClick={() => checkPayment()}
-              className="flex-1 bg-black hover:bg-blue-700"
-            >
+            <Button onClick={() => checkPayment()} className="flex-1 bg-black hover:bg-blue-700">
               Төлбөр шалгах
             </Button>
           </div>

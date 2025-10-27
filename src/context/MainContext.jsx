@@ -29,8 +29,6 @@ export const MainProvider = ({ children }) => {
     }, [pathname])
 
   
-
-
     return (
         <MainContext.Provider
             value={{
