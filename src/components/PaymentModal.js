@@ -72,12 +72,7 @@ export default function PaymentModal({ isOpen, onClose, data, price, slug }) {
             })}
         </ul>
                 </div>
-
-              </CardContent>
-            </Card>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-3">
+ <div className="flex space-x-3">
             <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent text-black">
               Буцах
             </Button>
@@ -88,6 +83,11 @@ export default function PaymentModal({ isOpen, onClose, data, price, slug }) {
               Төлбөр шалгах
             </Button>
           </div>
+              </CardContent>
+            </Card>
+
+          {/* Action Buttons */}
+         
 
           {/* Payment Status */}
           <div className="text-center">
