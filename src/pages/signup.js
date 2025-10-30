@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { AlertCircle, Check, Eye, EyeOff, Lock, Mail, User, UserPlus, X } from "lucide-react"
+import { AlertCircle, Check, Eye, EyeOff, Lock, Mail, Phone, User, UserPlus, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
@@ -72,7 +72,8 @@ export default function Signup() {
       password: btoa(values.password),
       passwordMatch: btoa(values.passwordMatch),
       firstName: values.firstName,
-      lastName: values.lastName
+      lastName: values.lastName,
+      phoneNumber: values.phoneNumber,
     }).then((res) => {
       if (res?.status) {
         router.replace('/login')
@@ -133,7 +134,8 @@ export default function Signup() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                 <Label htmlFor="email">Имэйл хаяг</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -147,6 +149,23 @@ export default function Signup() {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Утасны дугаар</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phoneNumber"
+                    type="number"
+                    placeholder="Утасны дугаар"
+                    {...register('phoneNumber', {required: 'Заавал оруулах'})}
+                    className="pl-10"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+              </div>
+
+              
 
               <div className="space-y-2">
                 <Label htmlFor="password">Нууц үг</Label>
