@@ -18,7 +18,7 @@ export const destroyTokens = (reload = false) => {
   if (reload === true) {
     window.location.reload();
   } else {
-    window.location.replace('/login');
+    // window.location.replace('/login');
   }
 };
 
