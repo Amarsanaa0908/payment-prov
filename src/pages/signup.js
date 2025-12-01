@@ -12,7 +12,7 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "react-toastify"
+import { toast } from "sonner"
 
 export default function Signup() {
   const router = useRouter()
@@ -78,6 +78,7 @@ export default function Signup() {
       if (res?.status) {
         router.replace('/login')
       } else {
+        console.log("asjkh")
         toast.error(res.msg[0]);
         setIsLoading(false)
       }

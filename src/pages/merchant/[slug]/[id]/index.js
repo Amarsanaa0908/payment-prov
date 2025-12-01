@@ -355,12 +355,12 @@ useEffect(() => {
                 
                 
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">Нийт</span>
-                  <span className="font-medium text-black">{formatNumberWithCommas(price)} MNT</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Хүргэлт</span>
                   <span className="font-medium text-black">{formatNumberWithCommas(selected.price)} MNT </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">Нийт</span>
+                  <span className="font-medium text-black">{formatNumberWithCommas(price)} MNT</span>
                 </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between items-center">
