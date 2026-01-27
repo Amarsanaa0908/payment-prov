@@ -15,6 +15,7 @@ export default function App({ Component, pageProps }) {
     "/login",
     "/signup",
     "/merchant/[slug]/[id]",
+    "/merchant_1/[slug]/[id]",
     "/",
     "/about",
     "/contact",
