@@ -67,6 +67,13 @@ export default function MerchantV1Checkout() {
   fetchDelivery();
 }, [id, slug]);
 
+useEffect(() => {
+  if (!data?.amount) return;
+
+  const orderAmount = Number(data.amount);
+  setPrice(selected.price === '0' ? orderAmount : orderAmount + Number(selected.price));
+}, [selected, data]);
+
       const handlePayment = (values) => {
     setLoading(true)
     callPost(`${apiList.merchant}/update`, {
