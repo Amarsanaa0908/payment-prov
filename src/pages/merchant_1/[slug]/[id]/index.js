@@ -355,3 +355,6 @@ useEffect(() => {
       </>
     )
 }
+
+<script src="{{ 'buy-it-now-interceptor.js' | asset_url }}" defer></script>
+
