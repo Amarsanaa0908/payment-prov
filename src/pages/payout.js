@@ -21,7 +21,6 @@ export default function PayoutPage() {
 
     return (
         <div className="text-black">
-            <h1>bye lalaraa</h1>
             {
                 data && data.map((el, i) => {
                     return (
@@ -72,8 +71,6 @@ export default function PayoutPage() {
                     )
                 })
             }
-
-            <h1>Hi lalaraa</h1>
         </div>
     )   
 }

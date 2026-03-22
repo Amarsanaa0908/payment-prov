@@ -16,6 +16,7 @@ export default function App({ Component, pageProps }) {
     "/signup",
     "/merchant/[slug]/[id]",
     "/merchant_1/[slug]/[id]",
+    "/merchant_2/[slug]/[id]",
     "/",
     "/about",
     "/contact",
@@ -24,6 +25,7 @@ export default function App({ Component, pageProps }) {
     "/careers",
     "/confirm/[id]"
   ]
+
   const isAuthPage = authPages.includes(router.pathname)
 
   return (

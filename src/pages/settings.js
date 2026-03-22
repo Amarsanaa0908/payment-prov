@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Database, Download, Edit, Edit2, Key, Plus, RefreshCw, Save, SettingsIcon, Trash2, Upload } from "lucide-react"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -35,6 +36,7 @@ const [delivery, setDelivery] = useState([]);
 const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 const [isAddDeliveryModalOpen, setIsAddDeliveryModalOpen] = useState(false);
 const [editingIndex, setEditingIndex] = useState(null);
+const [notificationSettings, setNotificationSettings] = useState()
 
 const { control, handleSubmit, reset } = useForm({
   defaultValues: {
@@ -193,7 +195,11 @@ const handleDeliveryFormSubmit = async (values) => {
     }
   })
 }
-  
+ 
+
+const handleSaveTab = async (e) => {
+  console.log("first")
+}
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
@@ -213,10 +219,10 @@ const handleDeliveryFormSubmit = async (values) => {
             <TabsTrigger value="delivery" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Хүргэлт
             </TabsTrigger>
-            {/* <TabsTrigger value="notifications" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
-              Мэдэгдэл
+            <TabsTrigger value="payment" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
+              Төлбөр
             </TabsTrigger>
-            <TabsTrigger value="security" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
+            {/* <TabsTrigger value="security" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
               Нууцлал
             </TabsTrigger>
             <TabsTrigger value="api" className="text-xs sm:text-sm text-black data-[state=active]:text-white">
@@ -676,7 +682,7 @@ const handleDeliveryFormSubmit = async (values) => {
 </Dialog>
 </TabsContent>
 
-        {/* <TabsContent value="notifications" className="space-y-4">
+        <TabsContent value="payment" className="space-y-4">
           <form
             onSubmit={(e) => {
               e.preventDefault()
@@ -687,9 +693,9 @@ const handleDeliveryFormSubmit = async (values) => {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <CardTitle className="text-base sm:text-lg">Notification Preferences</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">Төлбөрийн аргууд</CardTitle>
                     <CardDescription className="text-sm">
-                      Configure how and when you receive notifications
+                      Санал болгодог төлбөрийн аргуудаа нэмээрэй
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -702,76 +708,125 @@ const handleDeliveryFormSubmit = async (values) => {
                     )}
                     <Button type="submit" disabled={loadingStates.notifications}>
                       <Save className="h-4 w-4 mr-2" />
-                      {loadingStates.notifications ? "Saving..." : "Save Notifications"}
+                      {loadingStates.notifications ? "Хадгалж байна..." : "Хадгалах"}
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">Email Notifications</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Receive notifications via email</p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings((prev) => ({ ...prev, emailNotifications: checked }))
-                    }
-                  />
-                </div>
-                <Separator />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">Push Notifications</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Receive push notifications in browser</p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.pushNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings((prev) => ({ ...prev, pushNotifications: checked }))
-                    }
-                  />
-                </div>
-                <Separator />
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="text-sm font-medium">Marketing Emails</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Receive marketing and promotional emails</p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.marketingEmails}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings((prev) => ({ ...prev, marketingEmails: checked }))
-                    }
-                  />
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <Label>Notification Frequency</Label>
-                  <Select
-                    value={notificationSettings.notificationFrequency}
-                    onValueChange={(value) =>
-                      setNotificationSettings((prev) => ({ ...prev, notificationFrequency: value }))
-                    }
-                  >
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="immediate">Immediate</SelectItem>
-                      <SelectItem value="hourly">Hourly Digest</SelectItem>
-                      <SelectItem value="daily">Daily Digest</SelectItem>
-                      <SelectItem value="weekly">Weekly Digest</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="flex items-center gap-3">
+      <Image
+        src="https://static.wixstatic.com/media/e44a2b_c39f9a4fb88c4a438b4641662f96dc63~mv2.png/v1/fill/w_121,h_60,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20qpay_png.png"
+        alt="QPay"
+        width={40}
+        height={40}
+        className="rounded-md"
+      />
+      <div>
+        <h4 className="text-sm font-medium">QPay</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">1% хасагдаж таны данс руу шууд орно</p>
+      </div>
+    </div>
+    <Switch
+      checked={notificationSettings?.emailNotifications}
+      onCheckedChange={(checked) =>
+        setNotificationSettings((prev) => ({ ...prev, emailNotifications: checked }))
+      }
+    />
+  </div>
+  <Separator />
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="flex items-center gap-3">
+      <Image
+        src="https://apps.odoo.com/web/image/loempia.module/250097/icon_image?unique=1b23b2c"
+        alt="Cash on Delivery"
+        width={40}
+        height={40}
+        className="rounded-md"
+      />
+      <div>
+        <h4 className="text-sm font-medium">Cash on Delivery</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">Хүргүүлж аваад төлбөрөө төлөх</p>
+      </div>
+    </div>
+    <Switch
+      checked={notificationSettings?.pushNotifications}
+      onCheckedChange={(checked) =>
+        setNotificationSettings((prev) => ({ ...prev, pushNotifications: checked }))
+      }
+    />
+  </div>
+  <Separator />
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="flex items-center gap-3">
+      <Image
+        src="https://storepay.mn/new-logo.png"
+        alt="StorePay"
+        width={40}
+        height={40}
+        className="rounded-md"
+      />
+      <div>
+        <h4 className="text-sm font-medium">StorePay</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">Receive marketing and promotional emails</p>
+      </div>
+    </div>
+    <Switch
+      checked={notificationSettings?.marketingEmails}
+      onCheckedChange={(checked) =>
+        setNotificationSettings((prev) => ({ ...prev, marketingEmails: checked }))
+      }
+    />
+  </div>
+  <Separator />
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div className="flex items-center gap-3">
+      <Image
+        src="https://www.toki.mn/wp-content/uploads/2025/05/Asset-26-1.png"
+        alt="StorePay"
+        width={40}
+        height={40}
+        className="rounded-md"
+      />
+      <div>
+        <h4 className="text-sm font-medium">StorePay</h4>
+        <p className="text-xs sm:text-sm text-muted-foreground">Receive marketing and promotional emails</p>
+      </div>
+    </div>
+    <Switch
+      checked={notificationSettings?.marketingEmails}
+      onCheckedChange={(checked) =>
+        setNotificationSettings((prev) => ({ ...prev, storePay: checked }))
+      }
+    />
+  </div>
+  <Separator />
+  {/* <div className="space-y-2">
+    <Label>Notification Frequency</Label>
+    <Select
+      value={notificationSettings?.notificationFrequency}
+      onValueChange={(value) =>
+        setNotificationSettings((prev) => ({ ...prev, toki: value }))
+      }
+    >
+      <SelectTrigger className="w-full sm:w-48">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="immediate">Immediate</SelectItem>
+        <SelectItem value="hourly">Hourly Digest</SelectItem>
+        <SelectItem value="daily">Daily Digest</SelectItem>
+        <SelectItem value="weekly">Weekly Digest</SelectItem>
+      </SelectContent>
+    </Select>
+  </div> */}
+</CardContent>
             </Card>
           </form>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-4">
+        {/* <TabsContent value="security" className="space-y-4">
           <form
             onSubmit={(e) => {
               e.preventDefault()
