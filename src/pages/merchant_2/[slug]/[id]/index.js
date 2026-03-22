@@ -72,10 +72,15 @@ useEffect(() => {
   if (!data?.amount) return;
 
   const orderAmount = Number(data.amount);
-  setPrice(selected.price === '0' ? orderAmount : orderAmount + Number(selected.price));
-}, [selected, data]);
+  const FREE_SHIPPING_THRESHOLD = 50000;
+  const SHIPPING_PRICE = 5000;
 
-
+  // Override delivery price based on order amount
+  const shippingPrice = orderAmount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_PRICE;
+  
+  setSelected(prev => ({ ...prev, price: shippingPrice }));
+  setPrice(orderAmount + shippingPrice);
+}, [data]);
 
   const handlePayment = (values) => {
     setLoading(true)
@@ -343,8 +348,18 @@ useEffect(() => {
                 
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Хүргэлт</span>
-                  <span className="font-medium text-black">{formatNumberWithCommas(selected.price)} MNT </span>
+                  <span className="font-medium text-black">
+                    {selected.price === 0 
+                      ? <span className="text-green-600">Үнэгүй</span>
+                      : `${formatNumberWithCommas(selected.price)} MNT`
+                    }
+                  </span>
                 </div>
+                {Number(data?.amount) < 50000 && (
+                  <p className="text-xs text-gray-500">
+                    ₮{formatNumberWithCommas(50000 - Number(data?.amount))} нэмж захиалбал хүргэлт үнэгүй
+                  </p>
+                )}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Нийт</span>
                   <span className="font-medium text-black">{formatNumberWithCommas(price)} MNT</span>
