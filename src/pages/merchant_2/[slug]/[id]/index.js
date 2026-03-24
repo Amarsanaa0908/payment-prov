@@ -94,7 +94,8 @@ useEffect(() => {
         additionalPhone: values.additionalPhone,
         phone: values.phone,
         delivery: selected.id,
-        merchantId: slug
+        merchantId: slug,
+        email: values.email
     }).then((res) => {
         setLoading(false)
         if (res?.status) {
@@ -140,16 +141,16 @@ useEffect(() => {
               {/* Contact Information */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Холбоо барих мэдээлэл</h2>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <input
-                    type="phone"
-                    name="phone"
-                    placeholder="Утасны дугаар"
-                    {...register('phone', { required: true})}
+                    type="email"
+                    name="email"
+                    placeholder="И-мэйл"
+                    {...register('email', { required: true})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                     required
                   />
-                  <div className="flex items-center space-x-2">
+                  {/* <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       id="newsletter"
@@ -158,7 +159,7 @@ useEffect(() => {
                     <label htmlFor="newsletter" className="text-sm text-gray-600">
                       Цаашид и-мэйл ээр мэдээлэл авмаар байна
                     </label>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -208,9 +209,10 @@ useEffect(() => {
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="Нэмэлт утасны дугаар (optional)"
-                      {...register('additionalPhone')}
+                      placeholder="Утасны дугаар"
+                      {...register('phone')}
                       className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                      required
                     />
                   </div>
                 </div>
