@@ -143,12 +143,10 @@ useEffect(() => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Холбоо барих мэдээлэл</h2>
                 <div className="space-y-2">
                   <input
-                    type="email"
                     name="email"
                     placeholder="И-мэйл"
-                    {...register('email', { required: true})}
+                    {...register('email')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                    required
                   />
                   {/* <div className="flex items-center space-x-2">
                     <input
