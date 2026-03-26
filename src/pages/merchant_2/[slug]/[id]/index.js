@@ -176,6 +176,7 @@ useEffect(() => {
                       type="text"
                       name="firstName"
                       placeholder="Нэр"
+                      title="Заавал бөглөх"
                       {...register('firstName', {required: true})}
                       className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       required
@@ -185,6 +186,7 @@ useEffect(() => {
                     type="text"
                     name="address"
                     placeholder="Хаяг"
+                    title="Заавал бөглөх"
                     {...register('address', {required: true})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                     required
@@ -208,6 +210,7 @@ useEffect(() => {
                       type="tel"
                       name="phone"
                       placeholder="Утасны дугаар"
+                      title="Заавал бөглөх"
                       {...register('phone', {required:true})}
                       className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       required
