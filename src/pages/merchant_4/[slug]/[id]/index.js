@@ -2,7 +2,6 @@
 
 import { apiList, callGet, callGetList, callPost } from "@/axios/api"
 import PaymentModal from "@/components/PaymentModal"
-import { StorePayModal } from "@/components/StorePayModal"
 import { useMainContext } from "@/context/MainContext"
 import formatNumberWithCommas from "@/lib/math"
 import Image from "next/image"
@@ -29,16 +28,8 @@ export default function MerchantV2Checkout() {
   const [paymentData, setPaymentData] = useState()
   const [openModal, setOpenModal] = useState()
   const [delivery, setDelivery] = useState([])
-  const [open, setOpen] = useState(false)
-  const [formValues, setFormValues] = useState()
+  const [payment, setPayment] = useState()
   const { userInfo } = useMainContext()
-
-  const payments = [
-  { id: "qpay",     name: "QPay",     description: "QR код ашиглан төлөх", logo: "/qpay.jpg" },
-  { id: "storepay", name: "StorePay", description: "StorePay ашиглан төлөх", logo: "https://play-lh.googleusercontent.com/MYmzdiAqg2vQPe19wsnkSrDvLyDzvi-d-i90xKKtxccOcQ3ADp76nTlJxGm7RlNYLGHEMKM6JzMqXOv-bpwbzA" },
-];
-
-const [selectedPayment, setSelectedPayment] = useState("qpay");
 
   // ❌ Remove price logic from here
 useEffect(() => {
@@ -94,13 +85,7 @@ useEffect(() => {
 
   const handlePayment = (values) => {
     setLoading(true)
-    console.log(selectedPayment)
-    if (selectedPayment === 'storepay') {
-      console.log("here")
-      setOpen(true)
-      setFormValues(values)
-    } else {
-      callPost(`${apiList.merchant}/update`, {
+    callPost(`${apiList.merchant}/update`, {
         id: id,
         lastName: values.lastName,
         firstName: values.firstName,
@@ -112,7 +97,7 @@ useEffect(() => {
         delivery: selected.id,
         merchantId: slug,
         email: values.email,
-        method: selectedPayment,
+        // method: "TOKI",
     }).then((res) => {
         setLoading(false)
         if (res?.status) {
@@ -122,22 +107,20 @@ useEffect(() => {
           toast.error(res?.msg[0])          
         }
     })
-    }
   }
 
   if (!data || typeof price === 'undefined') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500 text-sm">Түр хүлээнэ үү...</p>
-      </div>
-    )
-  }
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <p className="text-gray-500 text-sm">Түр хүлээнэ үү...</p>
+    </div>
+  )
+}
 
 
   return (
     <>
     <PaymentModal onClose={() => setOpenModal(false)} isOpen={openModal} setOpenModal={setOpenModal} data={paymentData && paymentData} price={price} slug={slug} />
-    <StorePayModal onClose={() => setOpen(false)} isOpen={open} setOpenModal={setOpen} id={id} slug={slug} data={formValues} delivery={selected.id} />
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
@@ -303,32 +286,40 @@ useEffect(() => {
               {/* Payment Method */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Төлбөрийн хэлбэр</h2>
-                {payments.map((el, i) => (
-  <label
-    key={i}
-    className={`flex items-center p-4 border rounded-lg cursor-pointer ${
-      selectedPayment === el.id ? "border-blue-500" : "border-gray-300"
-    }`}
-  >
-    <input
-      type="radio"
-      name="payment"
-      value={el.id}
-      checked={selectedPayment === el.id}
-      onChange={() => setSelectedPayment(el.id)}
-      className="mt-1 mr-3 accent-blue-600"
-    />
-    <div className="flex justify-between items-center w-full">
-      <span className="text-sm font-medium text-gray-800 flex-1">
-        {el.name}
-        <p className="text-xs text-gray-500">{el.description}</p>
-      </span>
-      <div className="w-8 h-8 rounded overflow-hidden">
-        <Image alt={`${el.name}-logo`} src={el.logo} width={32} height={32} />
-      </div>
-    </div>
-  </label>
-))}
+                <div className="border border-gray-300 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="qpay"
+                        onChange={() => setPayment("qpay")}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-900">Qpay</span>
+                    </div>
+                    <div className="w-8 h-8 bg-blue-900 rounded flex items-center justify-center">
+                      <Image alt="qpay-logo" src="/qpay.jpg" width={2000} height={2000} />
+                    </div>
+                  </div>
+                </div>
+                <div className="border border-gray-300 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="cash"
+                        onChange={() => setPayment("cash")}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-900">COD (Cash on delivery)</span>
+                    </div>
+                    <div className="w-8 h-8 rounded flex items-center justify-center">
+                      {/* <Image alt="qpay-logo" src="/qpay.jpg" width={2000} height={2000} /> */}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <button
