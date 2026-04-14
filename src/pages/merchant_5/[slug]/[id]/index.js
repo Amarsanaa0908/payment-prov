@@ -71,7 +71,7 @@ useEffect(() => {
   const orderAmount = Number(data.amount);
   setPrice(selected.price === '0' ? orderAmount : orderAmount + Number(selected.price));
   if (payment === 'cash') {
-    setPrice(8000)
+    setPrice(7000)
   }
 }, [selected, data, payment]);
 
