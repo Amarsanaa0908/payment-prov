@@ -4,6 +4,7 @@ import { apiList, callPost } from "@/axios/api"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
@@ -259,25 +260,9 @@ export default function Signup() {
                 )}
               </div>
 
-              {/* <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="agreeToTerms"
-                  checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked)}
-                  disabled={isLoading}
-                  className="mt-1"
-                />
-                <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
-                  I agree to the{" "}
-                  <Link href="/terms" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" className="text-primary hover:underline">
-                    Privacy Policy
-                  </Link>
-                </Label>
-              </div> */}
+              <div className="flex items-start space-x-2 text-xs">
+                Та бүртгүүлсний дараа 9514-1452 дугаарт холбогдож QPay холболтоо хийлгээрэй
+              </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
