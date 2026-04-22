@@ -95,9 +95,9 @@ export default function BillingPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            Billing & Invoices
+            Төлбөр
           </h1>
-          <p className="text-gray-400">Manage your billing information and view payment history</p>
+          <p className="text-gray-400">Төлбөрөө төлөөд эрхээ идэвхтэй байлгаарайф</p>
         </div>
 
         {/* Tabs */}
@@ -131,29 +131,36 @@ export default function BillingPage() {
         {activeTab === "overview" && (
           <div className="space-y-8">
             {/* Current Bill */}
+             <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-white">Invoice History</h2>
+              <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
+                <Download className="w-4 h-4 mr-2" />
+                Төлбөр сунгах
+              </button>
+            </div>
             <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold mb-6 text-white">Current Bill</h2>
+              <h2 className="text-2xl font-bold mb-6 text-white">Төлөх дүн</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
                   <DollarSign className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">$2,450.00</p>
-                  <p className="text-gray-400">Current Month</p>
+                  <p className="text-3xl font-bold text-white mb-1">75000.00</p>
+                  <p className="text-gray-400">Энэ сард</p>
                 </div>
                 <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
                   <Calendar className="w-8 h-8 text-purple-400 mx-auto mb-3" />
                   <p className="text-3xl font-bold text-white mb-1">Dec 31</p>
-                  <p className="text-gray-400">Next Bill Date</p>
+                  <p className="text-gray-400">Төлбөр төлөх хугацаа</p>
                 </div>
                 <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
                   <FileText className="w-8 h-8 text-pink-400 mx-auto mb-3" />
                   <p className="text-3xl font-bold text-white mb-1">3</p>
-                  <p className="text-gray-400">Pending Invoices</p>
+                  <p className="text-gray-400">Идэвхтэй дэлгүүр</p>
                 </div>
               </div>
             </div>
 
             {/* Usage Summary */}
-            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
+            {/* <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
               <h2 className="text-2xl font-bold mb-6 text-white">Usage Summary</h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 rounded-lg border border-gray-700 bg-black/50">
@@ -178,8 +185,49 @@ export default function BillingPage() {
                   <p className="text-white font-bold">$50.00</p>
                 </div>
               </div>
+            </div> */}
+            <div className="space-y-6">
+
+            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 backdrop-blur-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-black/50 border-b border-gray-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Invoice ID</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Description</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Amount</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {billingHistory.map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-gray-800/50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-medium text-white">{invoice.id}</td>
+                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.date}</td>
+                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.description}</td>
+                        <td className="px-6 py-4 text-sm font-medium text-white">${invoice.amount.toFixed(2)}</td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Paid
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
+                            Download PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+          </div>
+          
         )}
 
         {/* Invoices Tab */}

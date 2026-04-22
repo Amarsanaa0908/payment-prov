@@ -1,7 +1,7 @@
 "use client"
 
 import { destroyTokens } from "@/lib/auth"
-import { BarChart3, Eye, LayoutDashboard, LogOut, Menu, Settings, ShoppingCart, User, X } from "lucide-react"
+import { BarChart3, CreditCard, Eye, LayoutDashboard, LogOut, Menu, Settings, ShoppingCart, User, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useState } from "react"
@@ -12,6 +12,7 @@ const navigation = [
   { name: "Захиалга", href: "/orders", icon: ShoppingCart },
   { name: "Тохиргоо", href: "/settings", icon: Settings },
   { name: "Дэлгүүр", href: "/preview", icon: Eye },
+  { name: "Төлбөр", href: "/billing", icon: CreditCard },
 ]
 
 export default function Layout({ children }) {

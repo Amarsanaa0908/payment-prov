@@ -74,12 +74,12 @@ export default function HomePage() {
                 Эхлэх </Link>
                 
               </Button>
-              <Button
+              {/* <Button
                 size="lg"
                 className="bg-transparent border-2 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 hover:text-cyan-300 px-8 py-4 text-lg backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]"
               >
                 Заавар үзэх
-              </Button>
+              </Button> */}
             </div>
           </div>
 

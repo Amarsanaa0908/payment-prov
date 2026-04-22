@@ -35,7 +35,7 @@ export default function MerchantV2Checkout() {
 
   const payments = [
   { id: "qpay",     name: "QPay",     description: "QR код ашиглан төлөх", logo: "/qpay.jpg" },
-  { id: "storepay", name: "StorePay", description: "StorePay ашиглан төлөх", logo: "https://play-lh.googleusercontent.com/MYmzdiAqg2vQPe19wsnkSrDvLyDzvi-d-i90xKKtxccOcQ3ADp76nTlJxGm7RlNYLGHEMKM6JzMqXOv-bpwbzA" },
+  { id: "storepay", name: "StorePay", description: "100,000-с дээш дүнтэй захиалганд ашиглах боломжтой", logo: "https://play-lh.googleusercontent.com/MYmzdiAqg2vQPe19wsnkSrDvLyDzvi-d-i90xKKtxccOcQ3ADp76nTlJxGm7RlNYLGHEMKM6JzMqXOv-bpwbzA" },
 ];
 
 const [selectedPayment, setSelectedPayment] = useState("qpay");
