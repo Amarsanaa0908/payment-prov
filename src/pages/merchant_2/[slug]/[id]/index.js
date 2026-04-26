@@ -41,6 +41,10 @@ export default function MerchantV2Checkout() {
   // { id: "toki", name: "Toki", description :"QR код ашиглан төлөх", logo: "https://www.toki.mn/wp-content/uploads/2025/05/Asset-26-1.png"}
 ];
 
+const availablePayments = payments.filter(
+  (p) => p.id !== "storepay" || Number(data?.amount) >= 100000
+);
+
 const [selectedPayment, setSelectedPayment] = useState("qpay");
 
   // ❌ Remove price logic from here
@@ -313,7 +317,7 @@ useEffect(() => {
               {/* Payment Method */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Төлбөрийн хэлбэр</h2>
-                {payments.map((el, i) => (
+                {availablePayments.map((el, i) => (
   <label
     key={i}
     className={`flex items-center p-4 border rounded-lg cursor-pointer ${
