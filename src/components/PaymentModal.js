@@ -60,7 +60,7 @@ export default function PaymentModal({ isOpen, onClose, data, price, slug }) {
 
                 <div className="">
                   <ul className='sm:hidden flex justify-center flex-wrap gap-5'>
-          {data &&
+          {data && data?.urls &&
             data?.urls.map((el, i) => {
               return (
                 <li key={i}>

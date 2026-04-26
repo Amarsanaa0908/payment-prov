@@ -18,7 +18,6 @@ import { CheckCircle, Phone } from "lucide-react"
 import { apiList, callPost } from "@/axios/api"
 
 
-
 export function StorePayModal({isOpen, onClose, setOpenModal, data, id, slug, delivery}) {
   const [open, setOpen] = useState(false)
   const [phone, setPhone] = useState("")

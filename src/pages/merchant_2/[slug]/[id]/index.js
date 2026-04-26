@@ -3,6 +3,7 @@
 import { apiList, callGet, callGetList, callPost } from "@/axios/api"
 import PaymentModal from "@/components/PaymentModal"
 import { StorePayModal } from "@/components/StorePayModal"
+import TokiModal from "@/components/TokiModal"
 import { useMainContext } from "@/context/MainContext"
 import formatNumberWithCommas from "@/lib/math"
 import Image from "next/image"
@@ -30,12 +31,14 @@ export default function MerchantV2Checkout() {
   const [openModal, setOpenModal] = useState()
   const [delivery, setDelivery] = useState([])
   const [open, setOpen] = useState(false)
+  const [tokiModal, setTokiModal] = useState(false)
   const [formValues, setFormValues] = useState()
   const { userInfo } = useMainContext()
 
   const payments = [
   { id: "qpay",     name: "QPay",     description: "QR код ашиглан төлөх", logo: "/qpay.jpg" },
   { id: "storepay", name: "StorePay", description: "100,000-с дээш дүнтэй захиалганд ашиглах боломжтой", logo: "https://play-lh.googleusercontent.com/MYmzdiAqg2vQPe19wsnkSrDvLyDzvi-d-i90xKKtxccOcQ3ADp76nTlJxGm7RlNYLGHEMKM6JzMqXOv-bpwbzA" },
+  // { id: "toki", name: "Toki", description :"QR код ашиглан төлөх", logo: "https://www.toki.mn/wp-content/uploads/2025/05/Asset-26-1.png"}
 ];
 
 const [selectedPayment, setSelectedPayment] = useState("qpay");
@@ -116,14 +119,20 @@ useEffect(() => {
     }).then((res) => {
         setLoading(false)
         if (res?.status) {
+          setPaymentData(res?.data)
+          if (selectedPayment === 'toki') {
+            setTokiModal(true) 
+          } else {
             setOpenModal(true);
-            setPaymentData(res?.data)
+          }
         } else {
           toast.error(res?.msg[0])          
         }
     })
     }
   }
+
+  console.log(tokiModal)
 
   if (!data || typeof price === 'undefined') {
     return (
@@ -138,6 +147,7 @@ useEffect(() => {
     <>
     <PaymentModal onClose={() => setOpenModal(false)} isOpen={openModal} setOpenModal={setOpenModal} data={paymentData && paymentData} price={price} slug={slug} />
     <StorePayModal onClose={() => setOpen(false)} isOpen={open} setOpenModal={setOpen} id={id} slug={slug} data={formValues} delivery={selected.id} />
+    <TokiModal onClose={() => setTokiModal(false)} isOpen={tokiModal} setOpenModal={setTokiModal} id={id} slug={slug} data={paymentData && paymentData} />
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">

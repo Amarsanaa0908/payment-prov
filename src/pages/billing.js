@@ -1,378 +1,268 @@
-"use client"
-
+import { useEffect, useState } from "react";
 import {
-    Calendar,
-    CheckCircle,
-    CreditCard,
-    DollarSign,
-    Download,
-    Edit,
-    FileText,
-    Plus,
-    Settings,
-    Trash2,
-} from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
+  Download,
+  DollarSign,
+  Calendar,
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Store,
+} from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { apiList, callGet, callPost } from "@/axios/api";
+import PaymentModal from "@/components/PaymentModal";
+import { toast } from "sonner";
 
-export default function BillingPage() {
-  const [activeTab, setActiveTab] = useState("overview")
+// Status config for visual consistency
+const STATUS_CONFIG = {
+  STATUS_NORMAL: {
+    label: "Идэвхтэй",
+    icon: CheckCircle,
+    badge: "default",
+    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    border: "border-emerald-200 dark:border-emerald-800",
+    text: "text-emerald-700 dark:text-emerald-300",
+    icon_color: "text-emerald-600 dark:text-emerald-400",
+  },
+  STATUS_UNPAID: {
+    label: "Төлөгдөөгүй",
+    icon: XCircle,
+    badge: "destructive",
+    bg: "bg-red-50 dark:bg-red-950/30",
+    border: "border-red-200 dark:border-red-800",
+    text: "text-red-700 dark:text-red-300",
+    icon_color: "text-red-600 dark:text-red-400",
+  },
+};
 
-  const billingHistory = [
-    {
-      id: "INV-2024-001",
-      date: "2024-12-01",
-      amount: 2450.0,
-      status: "paid",
-      description: "Monthly subscription + transaction fees",
-    },
-    {
-      id: "INV-2024-002",
-      date: "2024-11-01",
-      amount: 1890.0,
-      status: "paid",
-      description: "Monthly subscription + transaction fees",
-    },
-    {
-      id: "INV-2024-003",
-      date: "2024-10-01",
-      amount: 2100.0,
-      status: "paid",
-      description: "Monthly subscription + transaction fees",
-    },
-  ]
+export default function PaymentTab() {
+  const [stores, setStores] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false)
+  const [paymentData, setPaymentData] = useState()
 
-  const paymentMethods = [
-    {
-      id: 1,
-      type: "card",
-      last4: "4242",
-      brand: "Visa",
-      expiry: "12/26",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      type: "card",
-      last4: "5555",
-      brand: "Mastercard",
-      expiry: "08/25",
-      isDefault: false,
-    },
-  ]
+  useEffect(() => {
+    const fetchPayment = async () => {
+      try {
+        const res = await callGet(`${apiList.merchant}/stores`);
+        const data = res.items;
+        setStores(data || []);
+        setInvoices(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayment();
+  }, []);
+
+  const toggleSelect = (id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const selectedTotal = selected.length * 75000;
+
+  const activeCount = stores.filter((s) => s.days_left > 0).length;
+
+const handlePay = async () => {
+  try {
+    const res = await callPost(`${apiList.merchant}/plan`, {
+      id: selected,
+    });
+
+    if (res?.status) {
+      setOpen(true)
+      setPaymentData(res?.data)
+    } else {
+      toast.error(res?.msg[0])
+    }
+    
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <p className="text-muted-foreground">Уншиж байна...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
-      <nav className="border-b border-gray-800 bg-black/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent"
-            >
-              PayFlow
-            </Link>
-            <div className="flex space-x-8">
-              <Link href="/dashboard" className="text-gray-300 hover:text-cyan-400 transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/billing" className="text-cyan-400">
-                Billing
-              </Link>
-              <Link href="/subscriptions" className="text-gray-300 hover:text-cyan-400 transition-colors">
-                Subscriptions
-              </Link>
-              <Link href="/payment-history" className="text-gray-300 hover:text-cyan-400 transition-colors">
-                Payments
-              </Link>
+    <div className="space-y-4 p-8">
+      <PaymentModal onClose={() => setOpen(false)} isOpen={open} setOpenModal={setOpen} data={paymentData && paymentData} />
+      {/* Summary Cards */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Store className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-2xl font-bold">{stores.length}</p>
+              <p className="text-sm text-muted-foreground">Нийт дэлгүүр</p>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <CheckCircle className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
+              <p className="text-2xl font-bold">{activeCount}</p>
+              <p className="text-sm text-muted-foreground">Идэвхтэй</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <DollarSign className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+              <p className="text-2xl font-bold">
+                {stores.reduce((s, st) => s + st.amount, 0).toLocaleString()}₮
+              </p>
+              <p className="text-sm text-muted-foreground">Сарын нийт</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Store List */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-base sm:text-lg">
+                Дэлгүүрүүд
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Сунгах дэлгүүрээ сонгоно уу
+              </CardDescription>
+            </div>
+            {selected.length > 0 && (
+              <Button onClick={handlePay}>
+                <Download className="h-4 w-4 mr-2" />
+                Сунгах ({selected.length}) — {selectedTotal.toLocaleString()}₮
+              </Button>
+            )}
           </div>
-        </div>
-      </nav>
+        </CardHeader>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            Төлбөр
-          </h1>
-          <p className="text-gray-400">Төлбөрөө төлөөд эрхээ идэвхтэй байлгаарайф</p>
-        </div>
+        <CardContent>
+          <div className="space-y-3">
+            {stores.map((store) => {
+              const config = STATUS_CONFIG[store.statusCode] || STATUS_CONFIG.STATUS_UNPAID;
+              const StatusIcon = config.icon;
+              const isSelected = selected.includes(store.id);
 
-        {/* Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-800">
-            <nav className="-mb-px flex space-x-8">
-              {[
-                { id: "overview", label: "Overview", icon: DollarSign },
-                { id: "invoices", label: "Invoices", icon: FileText },
-                { id: "payment-methods", label: "Payment Methods", icon: CreditCard },
-                { id: "settings", label: "Settings", icon: Settings },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? "border-cyan-500 text-cyan-400"
-                      : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
+              return (
+                <div
+                  key={store.id}
+                  onClick={() => toggleSelect(store.id)}
+                  className={`flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : config.bg + " " + config.border
                   }`}
                 >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelect(store.id)}
+                    className="shrink-0"
+                  />
 
-        {/* Overview Tab */}
-        {activeTab === "overview" && (
-          <div className="space-y-8">
-            {/* Current Bill */}
-             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">Invoice History</h2>
-              <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
-                <Download className="w-4 h-4 mr-2" />
-                Төлбөр сунгах
-              </button>
-            </div>
-            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold mb-6 text-white">Төлөх дүн</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
-                  <DollarSign className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">75000.00</p>
-                  <p className="text-gray-400">Энэ сард</p>
-                </div>
-                <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
-                  <Calendar className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">Dec 31</p>
-                  <p className="text-gray-400">Төлбөр төлөх хугацаа</p>
-                </div>
-                <div className="text-center p-6 rounded-lg border border-gray-700 bg-black/50">
-                  <FileText className="w-8 h-8 text-pink-400 mx-auto mb-3" />
-                  <p className="text-3xl font-bold text-white mb-1">3</p>
-                  <p className="text-gray-400">Идэвхтэй дэлгүүр</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Usage Summary */}
-            {/* <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold mb-6 text-white">Usage Summary</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 rounded-lg border border-gray-700 bg-black/50">
-                  <div>
-                    <p className="text-white font-medium">Transaction Processing</p>
-                    <p className="text-gray-400 text-sm">12,450 transactions</p>
-                  </div>
-                  <p className="text-white font-bold">$1,245.00</p>
-                </div>
-                <div className="flex justify-between items-center p-4 rounded-lg border border-gray-700 bg-black/50">
-                  <div>
-                    <p className="text-white font-medium">Monthly Subscription</p>
-                    <p className="text-gray-400 text-sm">Pro Plan</p>
-                  </div>
-                  <p className="text-white font-bold">$99.00</p>
-                </div>
-                <div className="flex justify-between items-center p-4 rounded-lg border border-gray-700 bg-black/50">
-                  <div>
-                    <p className="text-white font-medium">Additional Features</p>
-                    <p className="text-gray-400 text-sm">Advanced analytics, API access</p>
-                  </div>
-                  <p className="text-white font-bold">$50.00</p>
-                </div>
-              </div>
-            </div> */}
-            <div className="space-y-6">
-
-            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 backdrop-blur-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-black/50 border-b border-gray-700">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Invoice ID</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Description</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Amount</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {billingHistory.map((invoice) => (
-                      <tr key={invoice.id} className="hover:bg-gray-800/50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-white">{invoice.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.date}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.description}</td>
-                        <td className="px-6 py-4 text-sm font-medium text-white">${invoice.amount.toFixed(2)}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Paid
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
-                            Download PDF
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          </div>
-          
-        )}
-
-        {/* Invoices Tab */}
-        {activeTab === "invoices" && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">Invoice History</h2>
-              <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
-                <Download className="w-4 h-4 mr-2" />
-                Download All
-              </button>
-            </div>
-
-            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 backdrop-blur-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-black/50 border-b border-gray-700">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Invoice ID</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Description</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Amount</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {billingHistory.map((invoice) => (
-                      <tr key={invoice.id} className="hover:bg-gray-800/50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-white">{invoice.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.date}</td>
-                        <td className="px-6 py-4 text-sm text-gray-300">{invoice.description}</td>
-                        <td className="px-6 py-4 text-sm font-medium text-white">${invoice.amount.toFixed(2)}</td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            Paid
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button className="text-cyan-400 hover:text-cyan-300 text-sm font-medium">
-                            Download PDF
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Payment Methods Tab */}
-        {activeTab === "payment-methods" && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">Payment Methods</h2>
-              <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Payment Method
-              </button>
-            </div>
-
-            <div className="grid gap-6">
-              {paymentMethods.map((method) => (
-                <div key={method.id} className="bg-gray-900/50 rounded-2xl border border-gray-800 p-6 backdrop-blur-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-8 bg-gradient-to-r from-cyan-500 to-purple-500 rounded flex items-center justify-center">
-                        <CreditCard className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">
-                          {method.brand} •••• {method.last4}
-                        </p>
-                        <p className="text-gray-400 text-sm">Expires {method.expiry}</p>
-                      </div>
-                      {method.isDefault && (
-                        <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs font-medium rounded">
-                          Default
-                        </span>
-                      )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium truncate">{store.name}</p>
+                      <Badge variant="outline" className="text-xs">
+                        {store.plan}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button className="p-2 text-gray-400 hover:text-cyan-400 transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-red-400 transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {store.domain}
+                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Settings Tab */}
-        {activeTab === "settings" && (
-          <div className="space-y-8">
-            <div className="bg-gray-900/50 rounded-2xl border border-gray-800 p-8 backdrop-blur-sm">
-              <h2 className="text-2xl font-bold mb-6 text-white">Billing Settings</h2>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Billing Email</label>
-                  <input
-                    type="email"
-                    defaultValue="billing@company.com"
-                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-                  />
+                  <div className="hidden sm:flex items-center gap-2 shrink-0">
+                    <Clock className={`w-4 h-4 ${config.icon_color}`} />
+                    <span className={`text-sm font-medium ${config.text}`}>
+                      {store.daysLeft > 0
+                        ? `${store.daysLeft} хоног`
+                        : "Дууссан"}
+                    </span>
+                  </div>
+
+                  <div className="hidden md:block text-right shrink-0">
+                    <p className="text-sm font-medium">
+                      75,000₮
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {store.due_date}
+                    </p>
+                  </div>
+
+                  <Badge variant={config.badge} className="shrink-0">
+                    <StatusIcon className="w-3 h-3 mr-1" />
+                    {config.label}
+                  </Badge>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
-                  <input
-                    type="text"
-                    defaultValue="Acme Corporation"
-                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Tax ID</label>
-                  <input
-                    type="text"
-                    defaultValue="12-3456789"
-                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Billing Address</label>
-                  <textarea
-                    rows={3}
-                    defaultValue="123 Business St&#10;Suite 100&#10;San Francisco, CA 94105"
-                    className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors resize-none"
-                  />
-                </div>
-                <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-purple-600 transition-all duration-300">
-                  Save Changes
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Invoice History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg">
+            Төлбөрийн түүх
+          </CardTitle>
+          <CardDescription>Таны өмнөх төлбөрүүд</CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="space-y-3">
+            {invoices.map((inv) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
+                <div>
+                  <p className="font-medium">{inv.store_name}</p>
+                  <p className="text-sm text-muted-foreground">{inv.date}</p>
+                </div>
+                <Badge variant={inv.paid ? "default" : "secondary"}>
+                  {inv.amount.toLocaleString()}₮
+                </Badge>
+              </div>
+            ))}
+            {invoices.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Төлбөрийн түүх байхгүй
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
