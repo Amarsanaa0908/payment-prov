@@ -287,7 +287,7 @@ useEffect(() => {
                         </div>
                         </label>
                     </div>
-                    <div className="border border-gray-300 rounded-lg p-4">
+                    {/* <div className="border border-gray-300 rounded-lg p-4">
                         <label className="flex items-center justify-between cursor-pointer">
                         <div className="flex items-center space-x-3">
                             <input
@@ -301,7 +301,7 @@ useEffect(() => {
                         </div>
                         <div className="w-8 h-8 rounded flex items-center justify-center" />
                         </label>
-                    </div>
+                    </div> */}
                     </div>
 
   
