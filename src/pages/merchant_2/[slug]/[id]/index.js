@@ -6,6 +6,7 @@ import { StorePayModal } from "@/components/StorePayModal"
 import TokiModal from "@/components/TokiModal"
 import { useMainContext } from "@/context/MainContext"
 import formatNumberWithCommas from "@/lib/math"
+import { User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -33,7 +34,15 @@ export default function MerchantV2Checkout() {
   const [open, setOpen] = useState(false)
   const [tokiModal, setTokiModal] = useState(false)
   const [formValues, setFormValues] = useState()
+  const [deliveryType, setDeliveryType] = useState("delivery");
+const [selectedBranch, setSelectedBranch] = useState(null);
   const { userInfo } = useMainContext()
+
+  const branches = [
+    { id: "e-mart", name: "E-Mart", address: "Хан-Уул 15-р хороо"},
+    { id: "hunnu-mall", name: "Hunnu Mall", address: "Хан-Уул дүүрэг 24-р хороо"},
+    { id: "shangri-la", name: "Shangri-La", address: "Сүхбаатар дүүрэг 1-р хороо"}
+  ]
 
   const payments = [
   { id: "qpay",     name: "QPay",     description: "QR код ашиглан төлөх", logo: "/qpay.jpg" },
@@ -81,9 +90,30 @@ useEffect(() => {
     }
   };
 
+  const fetchBranches = async () => {
+    try {
+      const response = await callGet(`${apiList.merchant}/branches/${slug}`);
+      setDelivery(response.items || []);
+      if (response?.items.length > 0) {
+      const firstItem = response?.items[0];
+
+      setSelected({
+        id: firstItem.id || "",
+        name: firstItem.name || "",
+        description: firstItem.description || "",
+        price: Number(firstItem.price || 0),
+        store: firstItem.store || ""
+      });
+    }
+    } catch (error) {
+      console.log('Error fetching delivery:', error);
+    }
+  }
+
   fetchOrder();
   fetchDelivery();
-}, [id, slug]);
+  fetchBranches()
+}, [id, slug, deliveryType]);
 
 useEffect(() => {
   if (!data?.amount) return;
@@ -101,7 +131,6 @@ useEffect(() => {
 
   const handlePayment = (values) => {
     setLoading(true)
-    console.log(selectedPayment)
     if (selectedPayment === 'storepay') {
       console.log("here")
       setOpen(true)
@@ -120,6 +149,8 @@ useEffect(() => {
         merchantId: slug,
         email: values.email,
         method: selectedPayment,
+        deliveryType,
+        store: deliveryType === "pickup" ? selectedBranch : null,
     }).then((res) => {
         setLoading(false)
         if (res?.status) {
@@ -156,13 +187,34 @@ useEffect(() => {
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <a href={`https://${data?.url}`} target="_blank" rel="noopener noreferrer">
-            <h1 className="text-3xl font-bold text-black">
-              <span className={`text-[${data?.color}]`}>{data?.name}</span>
-            </h1></a>
+          
+          <div className="flex items-center justify-between">
             
+            {/* Logo / Title */}
+            <div className="flex-1 text-center">
+              <a
+                href={`https://${data?.url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <h1 className="text-3xl font-bold text-black">
+                  <span style={{ color: data?.color }}>
+                    {data?.name}
+                  </span>
+                </h1>
+              </a>
+            </div>
+
+            {/* Login Button */}
+            <Link
+              href="/login"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+
           </div>
+
         </div>
       </div>
 
@@ -195,123 +247,219 @@ useEffect(() => {
               </div>
 
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Хүргэлтийн мэдээлэл</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Овог"
-                      {...register('lastName')}
-                      className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                    />
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="Нэр"
-                      title="Заавал бөглөх"
-                      {...register('firstName', {required: true})}
-                      className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                      required
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Хаяг"
-                    title="Заавал бөглөх"
-                    {...register('address', {required: true})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="apartment"
-                    placeholder="Орцны кодтой бол оруулна уу"
-                    {...register('detail')}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="Хот"
-                      {...register('city')}
-                      className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="Утасны дугаар"
-                      title="Заавал бөглөх"
-                      {...register('phone', {required:true})}
-                      className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Delivery Options */}
-                <div className="">
-                {delivery.map((el, i) => (
-                  <label
-                  className={`flex items-start p-4! border rounded-lg cursor-pointer ${
-                    selected === "free"
-                    ? "border-red-500"
-                    : "border-gray-300"
-                  }`}
-                  key={i}
-                  >
-                    <input
-                  type="radio"
-                  name="delivery"
-                  value="paid"
-                  checked={selected === el}
-                  onChange={() => setSelected(el)}
-                  className="mt-1 mr-3 accent-blue-600"
-                  />
-                  <div className="flex justify-between w-full">
-                    <span className='text-sm font-medium text-gray-800 flex-1'>
-                      {el.name}
-                      <p className='text-xs text-gray-500'>
-                        {el.description}
-                      </p>
-                    </span>
-                    <span className="text-sm font-semibold text-blue-600 mt-1">
-                      {el.price === '0' ? 'Үнэгүй' : el.price}
-                    </span>
-                  </div>
-                </label>
-                ))}
                
-                {/* <label
-                  className={`flex items-start p-4! border rounded-lg cursor-pointer ${
-                    selected === "paid"
-                    ? "border-red-500"
-                    : "border-gray-300"
-                  }`}
-                >
-                  <input
-                  type="radio"
-                  name="delivery"
-                  value="paid"
-                  checked={selected === "paid"}
-                  onChange={() => setSelected("paid")}
-                  className="mt-1 mr-3 accent-blue-600"
-                  />
-                  <div className="flex justify-between w-full">
-                    <span className='text-sm font-medium text-gray-800 flex-1'>
-                      UB Cab хүргэлт
-                      <p className='text-xs text-gray-500'>
-                        Зөвхөн ажлын цагаар
-                      </p>
-                    </span>
-                    <span className="text-sm font-semibold text-blue-600 mt-1">
-                      20,000
-                    </span>
-                  </div>
-                </label> */}
-              </div>
+
+                {/* Delivery Type */}
+<div>
+  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    Захиалга авах төрөл
+  </h2>
+
+  <div className="grid grid-cols-2 gap-4 mb-6">
+
+    {/* Delivery */}
+    <label
+      className={`border rounded-lg p-4 cursor-pointer transition ${
+        deliveryType === "delivery"
+          ? "border-blue-500 bg-blue-50"
+          : "border-gray-300"
+      }`}
+    >
+      <input
+        type="radio"
+        name="deliveryType"
+        value="delivery"
+        checked={deliveryType === "delivery"}
+        onChange={() => setDeliveryType("delivery")}
+        className="hidden"
+      />
+
+      <div className="font-medium text-black">
+        Хүргэлт
+      </div>
+
+      <p className="text-sm text-gray-500">
+        Хаягаар хүргэнэ
+      </p>
+    </label>
+
+    {/* Pickup */}
+    <label
+      className={`border rounded-lg p-4 cursor-pointer transition ${
+        deliveryType === "pickup"
+          ? "border-blue-500 bg-blue-50"
+          : "border-gray-300"
+      }`}
+    >
+      <input
+        type="radio"
+        name="deliveryType"
+        value="pickup"
+        checked={deliveryType === "pickup"}
+        onChange={() => setDeliveryType("pickup")}
+        className="hidden"
+      />
+
+      <div className="font-medium text-black">
+        Очиж авах
+      </div>
+
+      <p className="text-sm text-gray-500">
+        Салбараас өөрөө авах
+      </p>
+    </label>
+  </div>
+</div>
+
+{/* CUSTOMER INFO */}
+<div>
+  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    {deliveryType === "delivery"
+      ? "Хүргэлтийн мэдээлэл"
+      : "Хэрэглэгчийн мэдээлэл"}
+  </h2>
+
+  <div className="space-y-4">
+
+    {/* NAME */}
+    <div className="grid grid-cols-2 gap-4">
+      <input
+        type="text"
+        placeholder="Овог"
+        {...register("lastName")}
+        className="px-4 py-3 border border-gray-300 rounded-md text-black"
+      />
+
+      <input
+        type="text"
+        placeholder="Нэр"
+        {...register("firstName", { required: true })}
+        className="px-4 py-3 border border-gray-300 rounded-md text-black"
+        required
+      />
+    </div>
+
+    {/* ADDRESS ONLY FOR DELIVERY */}
+    {deliveryType === "delivery" && (
+      <>
+        <input
+          type="text"
+          placeholder="Хаяг"
+          {...register("address", { required: true })}
+          className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Орцны кодтой бол оруулна уу"
+          {...register("detail")}
+          className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
+        />
+
+        <input
+          type="text"
+          placeholder="Хот"
+          {...register("city")}
+          className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
+        />
+      </>
+    )}
+
+    {/* PHONE */}
+    <input
+      type="tel"
+      placeholder="Утасны дугаар"
+      {...register("phone", { required: true })}
+      className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
+      required
+    />
+  </div>
+</div>
+
+{/* DELIVERY OPTIONS */}
+{deliveryType === "delivery" && (
+  <div className="space-y-4">
+
+    <h2 className="text-lg font-semibold text-gray-900">
+      Хүргэлтийн төрөл
+    </h2>
+
+    {delivery.map((el, i) => (
+      <label
+        key={i}
+        className={`flex items-start p-4 border rounded-lg cursor-pointer ${
+          selected?.id === el.id
+            ? "border-blue-500"
+            : "border-gray-300"
+        }`}
+      >
+        <input
+          type="radio"
+          name="delivery"
+          checked={selected?.id === el.id}
+          onChange={() => setSelected(el)}
+          className="mt-1 mr-3 accent-blue-600"
+        />
+
+        <div className="flex justify-between w-full">
+          <span className="text-sm font-medium text-gray-800 flex-1">
+            {el.name}
+
+            <p className="text-xs text-gray-500">
+              {el.description}
+            </p>
+          </span>
+
+          <span className="text-sm font-semibold text-blue-600 mt-1">
+            {el.price === "0"
+              ? "Үнэгүй"
+              : `${el.price}₮`}
+          </span>
+        </div>
+      </label>
+    ))}
+  </div>
+)}
+
+{/* PICKUP BRANCHES */}
+{deliveryType === "pickup" && (
+  <div className="space-y-4">
+
+    <h2 className="text-lg font-semibold text-gray-900">
+      Салбар сонгох
+    </h2>
+
+    {branches.map((branch, i) => (
+      <label
+        key={i}
+        className={`flex items-start p-4 border rounded-lg cursor-pointer ${
+          selectedBranch === branch.id
+            ? "border-blue-500"
+            : "border-gray-300"
+        }`}
+      >
+        <input
+          type="radio"
+          name="branch"
+          checked={selectedBranch === branch.id}
+          onChange={() => setSelectedBranch(branch.id)}
+          className="mt-1 mr-3 accent-blue-600"
+        />
+
+        <div>
+          <div className="font-medium text-black">
+            {branch.name}
+          </div>
+
+          <div className="text-sm text-gray-500">
+            {branch.address}
+          </div>
+        </div>
+      </label>
+    ))}
+  </div>
+)}
               </div>
 
               {/* Payment Method */}
@@ -394,9 +542,11 @@ useEffect(() => {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Хүргэлт</span>
                   <span className="font-medium text-black">
-                    {selected.price === 0 
-                      ? <span className="text-green-600">Үнэгүй</span>
-                      : `${formatNumberWithCommas(selected.price)} MNT`
+                    {deliveryType === "pickup"
+                      ? "Үнэгүй"
+                      : selected.price === 0
+                        ? "Үнэгүй"
+                        : `${formatNumberWithCommas(selected.price)} MNT`
                     }
                   </span>
                 </div>

@@ -181,6 +181,7 @@ const apiList = {
   merchant: '/merchant',
   register: '/register',
   delivery: '/delivery',
+  branches: '/branches'
 };
 
 export {
