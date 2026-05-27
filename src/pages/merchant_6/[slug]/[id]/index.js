@@ -148,7 +148,8 @@ const checkDiscount = async () => {
         phone: values.phone,
         delivery: selected.id,
         merchantId: slug,
-        method: payment
+        method: payment,
+        discountCode: discountCode
     }).then((res) => {
         setLoading(false)
         if (res?.status) {
