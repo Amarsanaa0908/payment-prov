@@ -26,6 +26,9 @@ export default function MerchantV1Checkout() {
       const [openModal, setOpenModal] = useState()
       const [delivery, setDelivery] = useState([])
       const [payment, setPayment] = useState()
+        const [discountCode, setDiscountCode] = useState("")
+  const [discountResult, setDiscountResult] = useState()
+  const [discountLoading, setDiscountLoading] = useState(false)
 
       
 
@@ -80,6 +83,26 @@ useEffect(() => {
   setSelected(prev => ({ ...prev, price: shippingPrice }));
   setPrice(orderAmount + shippingPrice);
 }, [data]);
+
+const checkDiscount = async () => {
+  if (!discountCode.trim()) return;
+
+  setDiscountLoading(true);
+  setDiscountResult(null);
+
+  try {
+    const res = await callPost(`${apiList.merchant}/discount`, {
+      code: discountCode,
+      id: slug,
+      orderTotal: price
+    });
+    setDiscountResult(res);
+  } catch (error) {
+    setDiscountResult({ valid: false, value: 0, valueType: "", message: "Алдаа гарлаа" });
+  } finally {
+    setDiscountLoading(false);
+  }
+}
 
 useEffect(() => {
   if (!data?.amount) return;
@@ -367,6 +390,63 @@ useEffect(() => {
                   </div>
                       )
                   })}
+
+                       <div className="flex justify-between items-center text-sm gap-4">
+                    <div className="w-full">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Купон код"
+                          value={discountCode}
+                          onChange={(e) => {
+                            setDiscountCode(e.target.value.toUpperCase());
+                            setDiscountResult(null); // reset on change
+                          }}
+                          className="w-full px-4 py-3 border-gray-300 border-2 rounded-md text-black"
+                        />
+                        <button
+                          className="px-4 py-3 border-gray-300 border-2 rounded-md bg-gray-200 text-black hover:cursor-pointer whitespace-nowrap disabled:opacity-50"
+                          onClick={checkDiscount}
+                          disabled={discountLoading || !discountCode.trim()}
+                          type="button"
+                        >
+                          {discountLoading ? "..." : "Шалгах"}
+                        </button>
+                      </div>
+                  
+                      {/* Feedback */}
+                      {discountResult && (
+                        discountResult.valid ? (
+                          <p className="text-green-600 text-xs mt-1">
+                            ✅{" "}
+                            {discountResult.valueType === "percentage" && `${discountResult.value}% хөнгөлөлт авлаа`}
+                            {discountResult.valueType === "fixed_amount" && `₮${discountResult.value} хөнгөлөлт авлаа`}
+                            {discountResult.valueType === "free_shipping" && "Үнэгүй хүргэлт авлаа"}
+                            {discountResult.valueType === "buy_x_get_y" && "Купон код амжилттай"}
+                          </p>
+                        ) : (
+                          <p className="text-red-500 text-xs mt-1">
+                            ❌ {discountResult.message || "Купон код буруу байна"}
+                          </p>
+                        )
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Show discount line if applied */}
+                  {discountResult?.valid && (
+                    <div className="flex justify-between items-center text-sm text-green-600">
+                      <span>Хөнгөлөлт ({discountCode})</span>
+                      <span>
+                        -{" "}
+                        {discountResult.valueType === "percentage"
+                          ? `${discountResult.value}%`
+                          : discountResult.valueType === "fixed_amount"
+                          ? `₮${formatNumberWithCommas(discountResult.value)}`
+                          : "Үнэгүй хүргэлт"}
+                      </span>
+                    </div>
+                  )}
                   
                   
                   <div className="flex justify-between items-center text-sm">
