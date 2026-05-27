@@ -30,6 +30,7 @@ export default function MerchantV1Checkout() {
   const [discountResult, setDiscountResult] = useState()
   const [discountLoading, setDiscountLoading] = useState(false)
 
+  const freeShipping = Number(data?.amount || 0) > 50000;
       
 
       useEffect(() => {
@@ -70,31 +71,59 @@ export default function MerchantV1Checkout() {
   fetchDelivery();
 }, [id, slug]);
 
+// useEffect(() => {
+//   if (!data?.amount) return;
+
+//   const orderAmount = Number(data.amount);
+
+//   // Total item count across all line items
+//   const totalQuantity = (data.lineItems || []).reduce(
+//     (sum, item) => sum + Number(item.quantity || 0),
+//     0
+//   );
+
+//   // Free shipping rules:
+//   // - 3+ items in cart, OR
+//   // - Order >= 50,000 MNT
+//   const FREE_SHIPPING_THRESHOLD = 50000;
+//   const FREE_SHIPPING_MIN_QTY = 2; // > 2 = free, i.e. 3 or more
+//   const SHIPPING_PRICE = 5000;
+
+//   let shippingPrice =
+//     totalQuantity > FREE_SHIPPING_MIN_QTY ||
+//     orderAmount >= FREE_SHIPPING_THRESHOLD
+//       ? 0
+//       : SHIPPING_PRICE;
+
+//   // Apply discount independently — works even when shipping is already free
+//   let discountAmount = 0;
+//   if (discountResult?.valid) {
+//     if (discountResult.valueType === "percentage") {
+//       discountAmount = (orderAmount * discountResult.value) / 100;
+//     } else if (discountResult.valueType === "fixed_amount") {
+//       discountAmount = discountResult.value;
+//     } else if (discountResult.valueType === "free_shipping") {
+//       shippingPrice = 0; // stacks safely; if already 0, still 0
+//     }
+//   }
+
+//   const total = Math.max(0, orderAmount + shippingPrice - discountAmount);
+
+//   setSelected(prev => ({ ...prev, price: shippingPrice }));
+//   setPrice(total);
+// }, [data, discountResult]);
 useEffect(() => {
   if (!data?.amount) return;
 
   const orderAmount = Number(data.amount);
 
-  // Total item count across all line items
-  const totalQuantity = (data.lineItems || []).reduce(
-    (sum, item) => sum + Number(item.quantity || 0),
-    0
-  );
+  // If user picked the 5000 option AND qualifies for free shipping, that line goes to 0.
+  // The 7000 option always costs 7000.
+  let shippingPrice = Number(selected?.price || 0);
+  if (freeShipping && shippingPrice === 5000) {
+    shippingPrice = 0;
+  }
 
-  // Free shipping rules:
-  // - 3+ items in cart, OR
-  // - Order >= 50,000 MNT
-  const FREE_SHIPPING_THRESHOLD = 50000;
-  const FREE_SHIPPING_MIN_QTY = 2; // > 2 = free, i.e. 3 or more
-  const SHIPPING_PRICE = 5000;
-
-  let shippingPrice =
-    totalQuantity > FREE_SHIPPING_MIN_QTY ||
-    orderAmount >= FREE_SHIPPING_THRESHOLD
-      ? 0
-      : SHIPPING_PRICE;
-
-  // Apply discount independently — works even when shipping is already free
   let discountAmount = 0;
   if (discountResult?.valid) {
     if (discountResult.valueType === "percentage") {
@@ -102,15 +131,16 @@ useEffect(() => {
     } else if (discountResult.valueType === "fixed_amount") {
       discountAmount = discountResult.value;
     } else if (discountResult.valueType === "free_shipping") {
-      shippingPrice = 0; // stacks safely; if already 0, still 0
+      shippingPrice = 0;
     }
   }
 
   const total = Math.max(0, orderAmount + shippingPrice - discountAmount);
 
-  setSelected(prev => ({ ...prev, price: shippingPrice }));
+  // Reflect the effective shipping price on selected so the summary row displays correctly
+  setSelected(prev => ({ ...prev, effectivePrice: shippingPrice }));
   setPrice(total);
-}, [data, discountResult]);
+}, [data, discountResult, selected?.id, selected?.price, freeShipping]);
 
 const checkDiscount = async () => {
   if (!discountCode.trim()) return;
@@ -160,6 +190,55 @@ const checkDiscount = async () => {
         }
     })
   }
+
+  {(() => {
+  const totalQuantity = (data?.lineItems || []).reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+  const orderAmount = Number(data?.amount || 0);
+  const freeShippingActive = totalQuantity > 2 || orderAmount >= 50000;
+
+  const visibleDelivery = freeShippingActive
+    ? delivery.filter(el => String(el.price) !== '5000')
+    : delivery;
+
+  return (
+    selected?.price !== 0.0 && (
+      <div className="">
+        <span className='flex flex-col-reverse lg:flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold text-gray-900">Хүргэлтийн мэдээлэл</h2>
+        </span>
+        {visibleDelivery.map((el, i) => (
+          <label
+            className={`flex items-start p-4! border rounded-lg cursor-pointer ${
+              selected?.id === el.id ? "border-red-500" : "border-gray-300"
+            }`}
+            key={i}
+          >
+            <input
+              type="radio"
+              name="delivery"
+              value="paid"
+              checked={selected?.id === el.id}
+              onChange={() => setSelected(el)}
+              className="mt-1 mr-3 accent-blue-600"
+            />
+            <div className="flex justify-between w-full">
+              <span className='text-sm font-medium text-gray-800 flex-1'>
+                {el.name}
+                <p className='text-xs text-gray-500'>{el.description}</p>
+              </span>
+              <span className="text-sm font-semibold text-blue-600 mt-1">
+                {el.price === '0' ? 'Үнэгүй' : el.price}
+              </span>
+            </div>
+          </label>
+        ))}
+      </div>
+    )
+  );
+})()}
 
   return (
       <>
@@ -264,69 +343,42 @@ const checkDiscount = async () => {
                   </div>
   
                   {/* Delivery Options */}
-                  {selected?.price !== 0.0 && <div className="">
-                  <span className='flex flex-col-reverse lg:flex-row justify-between items-center'>
-                    <h2 className="text-lg font-semibold text-gray-900">Хүргэлтийн мэдээлэл</h2>
-                  </span>
-                  {delivery.map((el, i) => (
-                    <label
-                    className={`flex items-start p-4! border rounded-lg cursor-pointer ${
-                      selected?.id === el.id
-                      ? "border-red-500"
-                      : "border-gray-300"
-                    }`}
-                    key={i}
-                    >
-                      <input
-                    type="radio"
-                    name="delivery"
-                    value="paid"
-                    checked={selected?.id === el.id}
-                    onChange={() => setSelected(el)}
-                    className="mt-1 mr-3 accent-blue-600"
-                    />
-                    <div className="flex justify-between w-full">
-                      <span className='text-sm font-medium text-gray-800 flex-1'>
-                        {el.name}
-                        <p className='text-xs text-gray-500'>
-                          {el.description}
-                        </p>
-                      </span>
-                      <span className="text-sm font-semibold text-blue-600 mt-1">
-                        {el.price === '0' ? 'Үнэгүй' : el.price}
-                      </span>
-                    </div>
-                  </label>
-                  ))}
-                 
-                  {/* <label
-                    className={`flex items-start p-4! border rounded-lg cursor-pointer ${
-                      selected === "paid"
-                      ? "border-red-500"
-                      : "border-gray-300"
-                    }`}
-                  >
-                    <input
-                    type="radio"
-                    name="delivery"
-                    value="paid"
-                    checked={selected === "paid"}
-                    onChange={() => setSelected("paid")}
-                    className="mt-1 mr-3 accent-blue-600"
-                    />
-                    <div className="flex justify-between w-full">
-                      <span className='text-sm font-medium text-gray-800 flex-1'>
-                        UB Cab хүргэлт
-                        <p className='text-xs text-gray-500'>
-                          Зөвхөн ажлын цагаар
-                        </p>
-                      </span>
-                      <span className="text-sm font-semibold text-blue-600 mt-1">
-                        20,000
-                      </span>
-                    </div>
-                  </label> */}
-                </div>}
+                  {delivery.length > 0 && (
+  <div className="">
+    <span className='flex flex-col-reverse lg:flex-row justify-between items-center'>
+      <h2 className="text-lg font-semibold text-gray-900">Хүргэлтийн мэдээлэл</h2>
+    </span>
+    {delivery.map((el, i) => {
+      const isFreeForThisOption = freeShipping && Number(el.price) === 5000;
+      return (
+        <label
+          className={`flex items-start p-4! border rounded-lg cursor-pointer ${
+            selected?.id === el.id ? "border-red-500" : "border-gray-300"
+          }`}
+          key={i}
+        >
+          <input
+            type="radio"
+            name="delivery"
+            value="paid"
+            checked={selected?.id === el.id}
+            onChange={() => setSelected(el)}
+            className="mt-1 mr-3 accent-blue-600"
+          />
+          <div className="flex justify-between w-full">
+            <span className='text-sm font-medium text-gray-800 flex-1'>
+              {el.name}
+              <p className='text-xs text-gray-500'>{el.description}</p>
+            </span>
+            <span className="text-sm font-semibold text-blue-600 mt-1">
+              {isFreeForThisOption ? 'Үнэгүй' : el.price}
+            </span>
+          </div>
+        </label>
+      );
+    })}
+  </div>
+)}
                 </div>
   
                 {/* Payment Method */}
@@ -470,14 +522,14 @@ const checkDiscount = async () => {
                   )}
                   
                   
-                  <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Хүргэлт</span>
-                <span className="font-medium text-black">
-                    {selected?.price === 0
-                    ? "Үнэгүй"
-                    : `${formatNumberWithCommas(selected?.price)} MNT`}
-                </span>
-                </div>
+                 <div className="flex justify-between items-center text-sm">
+  <span className="text-gray-600">Хүргэлт</span>
+  <span className="font-medium text-black">
+    {selected?.effectivePrice === 0
+      ? "Үнэгүй"
+      : `${formatNumberWithCommas(selected?.effectivePrice ?? selected?.price)} MNT`}
+  </span>
+</div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Нийт</span>
                     <span className="font-medium text-black">{formatNumberWithCommas(price)} MNT</span>
