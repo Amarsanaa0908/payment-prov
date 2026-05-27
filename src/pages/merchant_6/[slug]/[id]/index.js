@@ -74,15 +74,43 @@ useEffect(() => {
   if (!data?.amount) return;
 
   const orderAmount = Number(data.amount);
+
+  // Total item count across all line items
+  const totalQuantity = (data.lineItems || []).reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+
+  // Free shipping rules:
+  // - 3+ items in cart, OR
+  // - Order >= 50,000 MNT
   const FREE_SHIPPING_THRESHOLD = 50000;
+  const FREE_SHIPPING_MIN_QTY = 2; // > 2 = free, i.e. 3 or more
   const SHIPPING_PRICE = 5000;
 
-  // Override delivery price based on order amount
-  const shippingPrice = orderAmount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_PRICE;
-  
+  let shippingPrice =
+    totalQuantity > FREE_SHIPPING_MIN_QTY ||
+    orderAmount >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : SHIPPING_PRICE;
+
+  // Apply discount independently — works even when shipping is already free
+  let discountAmount = 0;
+  if (discountResult?.valid) {
+    if (discountResult.valueType === "percentage") {
+      discountAmount = (orderAmount * discountResult.value) / 100;
+    } else if (discountResult.valueType === "fixed_amount") {
+      discountAmount = discountResult.value;
+    } else if (discountResult.valueType === "free_shipping") {
+      shippingPrice = 0; // stacks safely; if already 0, still 0
+    }
+  }
+
+  const total = Math.max(0, orderAmount + shippingPrice - discountAmount);
+
   setSelected(prev => ({ ...prev, price: shippingPrice }));
-  setPrice(orderAmount + shippingPrice);
-}, [data]);
+  setPrice(total);
+}, [data, discountResult]);
 
 const checkDiscount = async () => {
   if (!discountCode.trim()) return;
@@ -94,7 +122,7 @@ const checkDiscount = async () => {
     const res = await callPost(`${apiList.merchant}/discount`, {
       code: discountCode,
       id: slug,
-      orderTotal: price
+      orderTotal: Number(data?.amount) || 0,  // raw subtotal, not the computed price
     });
     setDiscountResult(res);
   } catch (error) {
@@ -102,17 +130,9 @@ const checkDiscount = async () => {
   } finally {
     setDiscountLoading(false);
   }
-}
+};
 
-useEffect(() => {
-  if (!data?.amount) return;
 
-  const orderAmount = Number(data.amount);
-  setPrice(selected.price === '0' ? orderAmount : orderAmount + Number(selected.price));
-  if (payment === 'cash') {
-    setPrice(7000)
-  }
-}, [selected, data, payment]);
 
       const handlePayment = (values) => {
     setLoading(true)
@@ -450,9 +470,13 @@ useEffect(() => {
                   
                   
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-600">Хүргэлт</span>
-                    <span className="font-medium text-black">{formatNumberWithCommas(selected?.price)} MNT </span>
-                  </div>
+                <span className="text-gray-600">Хүргэлт</span>
+                <span className="font-medium text-black">
+                    {selected?.price === 0
+                    ? "Үнэгүй"
+                    : `${formatNumberWithCommas(selected?.price)} MNT`}
+                </span>
+                </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">Нийт</span>
                     <span className="font-medium text-black">{formatNumberWithCommas(price)} MNT</span>
