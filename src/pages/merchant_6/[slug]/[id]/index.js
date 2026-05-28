@@ -30,7 +30,7 @@ export default function MerchantV1Checkout() {
   const [discountResult, setDiscountResult] = useState()
   const [discountLoading, setDiscountLoading] = useState(false)
 
-  const freeShipping = Number(data?.amount || 0) > 50000;
+  const freeShipping = Number(data?.amount || 0) > 35000;
       
 
       useEffect(() => {
@@ -197,7 +197,7 @@ const checkDiscount = async () => {
     0
   );
   const orderAmount = Number(data?.amount || 0);
-  const freeShippingActive = totalQuantity > 2 || orderAmount >= 50000;
+  const freeShippingActive = totalQuantity > 2 || orderAmount >= 38000;
 
   const visibleDelivery = freeShippingActive
     ? delivery.filter(el => String(el.price) !== '5000')
