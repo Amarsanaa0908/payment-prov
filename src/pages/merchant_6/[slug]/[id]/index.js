@@ -390,6 +390,7 @@ const checkDiscount = async () => {
                             <input
                             type="radio"
                             name="payment"
+                            checked={true}
                             value="qpay"
                             onChange={() => setPayment("qpay")}
                             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
