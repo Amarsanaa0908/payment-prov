@@ -22,6 +22,7 @@ export default function App({ Component, pageProps }) {
     "/merchant_4/[slug]/[id]",
     "/merchant_5/[slug]/[id]",
     "/merchant_6/[slug]/[id]",
+    "/merchant_7/[slug]/[id]",
     "/",
     "/about",
     "/contact",
