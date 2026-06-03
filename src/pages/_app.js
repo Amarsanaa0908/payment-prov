@@ -32,6 +32,8 @@ export default function App({ Component, pageProps }) {
     "/confirm/[id]"
   ]
 
+  
+
   const isAuthPage = authPages.includes(router.pathname)
 
   return (
