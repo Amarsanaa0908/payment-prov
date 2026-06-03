@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 export default function MerchantV1Checkout() {
     const router = useRouter()
@@ -293,17 +294,17 @@ const checkDiscount = async () => {
                     <div className="grid grid-cols-2 gap-4">
                       <input
                         type="text"
-                        name="lastName"
-                        placeholder="Овог"
-                        {...register('lastName', {required: true})}
+                        name="firstName"
+                        placeholder="Овог нэр"
+                        {...register('firstName', {required: true})}
                         className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       />
                       <input
                         type="text"
-                        name="firstName"
-                        placeholder="Нэр"
-                        {...register('firstName', {required: true})}
+                        name="phone"
+                        placeholder="Утасны дугаар"
+                        {...register('phone', {required: true})}
                         className="px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                       />
@@ -316,13 +317,13 @@ const checkDiscount = async () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       required
                     />
-                    <input
+                    {/* <input
                       type="text"
                       name="apartment"
                       placeholder="Орцны кодтой бол оруулна уу"
                       {...register('detail', {required: true})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                    />
+                    /> */}
                     <input
                         type="text"
                         value={"Улаанбаатар"}
@@ -333,13 +334,13 @@ const checkDiscount = async () => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                         required
                     />
-                    <input
+                    {/* <input
                       type="text"
                       placeholder="Утасны дугаар"
                       {...register('phone', {required: true})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                       required
-                    />
+                    /> */}
                   </div>
   
                   {/* Delivery Options */}
