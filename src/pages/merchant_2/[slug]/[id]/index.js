@@ -434,7 +434,7 @@ useEffect(() => {
       <label
         key={i}
         className={`flex items-start p-4 border rounded-lg cursor-pointer ${
-          selectedBranch === branch.id
+          selectedBranch === branch.name
             ? "border-blue-500"
             : "border-gray-300"
         }`}
@@ -442,8 +442,8 @@ useEffect(() => {
         <input
           type="radio"
           name="branch"
-          checked={selectedBranch === branch.id}
-          onChange={() => setSelectedBranch(branch.id)}
+          checked={selectedBranch === branch.name}
+          onChange={() => setSelectedBranch(branch.name)}
           className="mt-1 mr-3 accent-blue-600"
         />
 
