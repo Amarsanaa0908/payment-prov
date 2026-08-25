@@ -1,16 +1,29 @@
 "use client"
 
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Card, CardContent } from './ui/card'
 import { QRCodeCanvas } from 'qrcode.react'
 import { Button } from './ui/button'
+import { apiList, callGet } from '@/axios/api'
+import { toast } from 'sonner'
 
 export default function TokiModal({isOpen, onClose, data, price, slug}) {
 
     const router = useRouter()
+    const [loading, setLoading] = useState(false)
     
+    const checkPayment = () => {
+    setLoading(true)
+    callGet(`${apiList.merchant}/check/${slug}/${data?.orderId}`).then((res) => {
+      if (res?.data === 'COMPLETED') {
+        router.push(`/confirm/${res?.data}`)
+      } else {
+        toast('Төлбөр төлөгдөөгүй байна')
+      }
+    })
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
