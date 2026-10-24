@@ -14,6 +14,8 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
+const REQUIRED_MSG = "Энэ талбарыг заавал бөглөнө үү"
+
 export default function MerchantV2Checkout() {
   const router = useRouter()
   const { id, slug } = router.query
@@ -222,7 +224,7 @@ useEffect(() => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Checkout Form */}
           <div className="space-y-8">
-            <form onSubmit={handleSubmit(handlePayment)} className="space-y-8">
+            <form onSubmit={handleSubmit(handlePayment)} className="space-y-8" noValidate>
               {/* Contact Information */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Холбоо барих мэдээлэл</h2>
@@ -323,32 +325,46 @@ useEffect(() => {
 
     {/* NAME */}
     <div className="grid grid-cols-2 gap-4">
-      <input
-        type="text"
-        placeholder="Овог"
-        {...register("lastName")}
-        className="px-4 py-3 border border-gray-300 rounded-md text-black"
-      />
+      <div>
+        <input
+          type="text"
+          placeholder="Овог"
+          {...register("lastName")}
+          className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
+        />
+      </div>
 
-      <input
-        type="text"
-        placeholder="Нэр"
-        {...register("firstName", { required: true })}
-        className="px-4 py-3 border border-gray-300 rounded-md text-black"
-        required
-      />
+      <div>
+        <input
+          type="text"
+          placeholder="Нэр"
+          {...register("firstName", { required: REQUIRED_MSG })}
+          className={`w-full px-4 py-3 border rounded-md text-black ${
+            errors.firstName ? "border-red-500" : "border-gray-300"
+          }`}
+        />
+        {errors.firstName && (
+          <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
+        )}
+      </div>
     </div>
 
     {/* ADDRESS ONLY FOR DELIVERY */}
     {deliveryType === "delivery" && (
       <>
-        <input
-          type="text"
-          placeholder="Хаяг"
-          {...register("address", { required: true })}
-          className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
-          required
-        />
+        <div>
+          <input
+            type="text"
+            placeholder="Хаяг"
+            {...register("address", { required: REQUIRED_MSG })}
+            className={`w-full px-4 py-3 border rounded-md text-black ${
+              errors.address ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.address && (
+            <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+          )}
+        </div>
 
         <input
           type="text"
@@ -367,13 +383,19 @@ useEffect(() => {
     )}
 
     {/* PHONE */}
-    <input
-      type="tel"
-      placeholder="Утасны дугаар"
-      {...register("phone", { required: true })}
-      className="w-full px-4 py-3 border border-gray-300 rounded-md text-black"
-      required
-    />
+    <div>
+      <input
+        type="tel"
+        placeholder="Утасны дугаар"
+        {...register("phone", { required: REQUIRED_MSG })}
+        className={`w-full px-4 py-3 border rounded-md text-black ${
+          errors.phone ? "border-red-500" : "border-gray-300"
+        }`}
+      />
+      {errors.phone && (
+        <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+      )}
+    </div>
   </div>
 </div>
 
